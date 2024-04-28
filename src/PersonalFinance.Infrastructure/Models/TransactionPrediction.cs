@@ -1,6 +1,6 @@
 ﻿using Microsoft.ML.Data;
 
-namespace MyApp;
+namespace PersonalFinance.Infrastructure.Models;
 
 public class TransactionPrediction
 {
