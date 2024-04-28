@@ -5,9 +5,9 @@ namespace PersonalFinance.Domain.Models;
 public class Transaction
 {
 
-    public Transaction(ITransactionMapper transactionMapper)
+    public Transaction(ITransactionMap transactionMap)
     {
-        InitializeProperties(transactionMapper);
+        InitializeProperties(transactionMap);
     }
 
     #region Properties
@@ -32,12 +32,12 @@ public class Transaction
     
     #region Helper Methods
 
-    private void InitializeProperties(ITransactionMapper transactionMapper)
+    private void InitializeProperties(ITransactionMap transactionMap)
     {
-        Amount = decimal.TryParse(transactionMapper.Amount, out var amountResult) ? amountResult : 0;
+        Amount = decimal.TryParse(transactionMap.Amount, out var amountResult) ? amountResult : 0;
         Bank = Constants.BofA;
-        Date = DateTime.TryParse(transactionMapper.Date, out var dateResult) ? dateResult : DateTime.MinValue;
-        Description = transactionMapper.Description;
+        Date = DateTime.TryParse(transactionMap.Date, out var dateResult) ? dateResult : DateTime.MinValue;
+        Description = transactionMap.Description;
         TransactionType = Amount < 0 ? TransactionType.Debit : TransactionType.Credit;
     }
 

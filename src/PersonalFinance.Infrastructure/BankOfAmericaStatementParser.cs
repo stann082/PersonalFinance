@@ -1,15 +1,16 @@
 ﻿using System.Globalization;
 using CsvHelper;
 using PersonalFinance.Domain.Models;
+using PersonalFinance.Infrastructure.Models;
 
 namespace PersonalFinance.Infrastructure;
 
-public static class BankOfAmericaStatementParser
+public class BankOfAmericaStatementParser : IBankOfAmericaStatementParser
 {
 
     #region Public Methods
 
-    public static async Task<ITransactionMapper[]> Parse(string filePath)
+    public async Task<ITransactionMap[]> Parse(string filePath)
     {
         StreamReader? reader = null;
         CsvReader? csv = null;
@@ -19,14 +20,14 @@ public static class BankOfAmericaStatementParser
             {
                 using (csv = new CsvReader(reader, CultureInfo.InvariantCulture))
                 {
-                    return await Task.FromResult(csv.GetRecords<BankOfAmericaTransactionMapper>().ToArray());
+                    return await Task.FromResult(csv.GetRecords<BankOfAmericaTransactionMap>().ToArray());
                 }
             }
         }
         catch (Exception e)
         {
             // log error
-            return await Task.FromResult(Array.Empty<ITransactionMapper>());
+            return await Task.FromResult(Array.Empty<ITransactionMap>());
         }
         finally
         {

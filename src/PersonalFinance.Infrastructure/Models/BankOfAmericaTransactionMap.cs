@@ -1,8 +1,8 @@
 ﻿using PersonalFinance.Domain.Models;
 
-namespace PersonalFinance.Infrastructure;
+namespace PersonalFinance.Infrastructure.Models;
 
-public class BankOfAmericaTransactionMapper : ITransactionMapper
+public class BankOfAmericaTransactionMap : ITransactionMap
 {
     public string Date { get; set; }
     public string? Description { get; set; }

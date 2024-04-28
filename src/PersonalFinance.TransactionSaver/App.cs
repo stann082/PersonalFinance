@@ -1,7 +1,11 @@
 ﻿using PersonalFinance.Domain.Models;
+using PersonalFinance.Domain.Services;
 using PersonalFinance.Infrastructure;
 
-public class App(ITransactionCategorizer transactionCategorizer)
+public class App(
+    IBankOfAmericaStatementParser statementParser,
+    IStatementService statementService,
+    ITransactionCategorizer transactionCategorizer)
 {
 
     #region Public Methods
@@ -16,10 +20,10 @@ public class App(ITransactionCategorizer transactionCategorizer)
         }
 
         string financesPath = Path.Combine(oneDrivePath, "Documents", "personal", "finances");
-        string transactionsMapFilePath = Path.Combine(financesPath, "transactions-map.csv");
-        if (!File.Exists(transactionsMapFilePath))
+        string categoryModelTrainingDataFilePath = Path.Combine(financesPath, "category-model-training-data.csv");
+        if (!File.Exists(categoryModelTrainingDataFilePath))
         {
-            Console.WriteLine($"File {transactionsMapFilePath} not found");
+            Console.WriteLine($"File {categoryModelTrainingDataFilePath} not found");
             return 1;
         }
 
@@ -30,9 +34,10 @@ public class App(ITransactionCategorizer transactionCategorizer)
             return 1;
         }
 
-        ITransactionMapper[] transactionMapper = await BankOfAmericaStatementParser.Parse(statementFilePath);
-        Transaction[] transactions = transactionMapper.Select(t => new Transaction(t)).ToArray();
-        await transactionCategorizer.CategorizeTransactions(transactionsMapFilePath, transactions);
+        ITransactionMap[] transactionMap = await statementParser.Parse(statementFilePath);
+        Transaction[] transactions = transactionMap.Select(t => new Transaction(t)).ToArray();
+        await transactionCategorizer.CategorizeTransactions(categoryModelTrainingDataFilePath, transactions);
+        await statementService.Save(transactions);
         return 0;
     }
 
