@@ -7,7 +7,7 @@ namespace PersonalFinance.Infrastructure;
 public class TransactionCategorizer : ITransactionCategorizer
 {
 
-    public async Task CategorizeTransactions(string modelTrainingFilePath, IEnumerable<Transaction> transactions)
+    public async Task CategorizeAsync(string modelTrainingFilePath, IEnumerable<Transaction> transactions)
     {
         var mlContext = new MLContext();
         var trainingDataView = mlContext.Data.LoadFromTextFile<TransactionData>(modelTrainingFilePath,

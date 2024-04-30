@@ -36,8 +36,8 @@ public class App(
 
         ITransactionMap[] transactionMap = await statementParser.Parse(statementFilePath);
         Transaction[] transactions = transactionMap.Select(t => new Transaction(t)).ToArray();
-        await transactionCategorizer.CategorizeTransactions(categoryModelTrainingDataFilePath, transactions);
-        await statementService.Save(transactions);
+        await transactionCategorizer.CategorizeAsync(categoryModelTrainingDataFilePath, transactions);
+        await statementService.SaveAsync(transactions);
         return 0;
     }
 

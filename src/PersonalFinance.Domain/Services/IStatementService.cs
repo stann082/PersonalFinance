@@ -4,5 +4,5 @@ namespace PersonalFinance.Domain.Services;
 
 public interface IStatementService
 {
-    Task Save(Transaction[] transactions);
+    Task SaveAsync(Transaction[] transactions);
 }
