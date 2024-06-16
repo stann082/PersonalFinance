@@ -14,7 +14,7 @@ public class TransactionCategorizer : ITransactionCategorizer
         var trainingDataView = mlContext.Data.LoadFromTextFile<TransactionData>(modelTrainingFilePath,
             hasHeader: false,
             separatorChar: ',');
-        
+
         Console.WriteLine("Load and prepare data");
         var loadedTransactions = mlContext.Data.CreateEnumerable<TransactionData>(trainingDataView, false).ToArray();
         if (loadedTransactions.Select(t => t.Description).FirstOrDefault() == null)
@@ -35,7 +35,7 @@ public class TransactionCategorizer : ITransactionCategorizer
 
         var recurringPipeline = GetRecurringPipeline(mlContext);
         var recurringModel = recurringPipeline.Fit(trainingDataView);
-        
+
         Console.WriteLine("Use the model for predictions");
         var categoryPredictor = await Task.FromResult(mlContext.Model.CreatePredictionEngine<TransactionData, CategoryPrediction>(categoryModel));
         var recurringPredictor = await Task.FromResult(mlContext.Model.CreatePredictionEngine<TransactionData, RecurringPrediction>(recurringModel));
@@ -52,19 +52,18 @@ public class TransactionCategorizer : ITransactionCategorizer
 
     private IEstimator<ITransformer> GetCategoryPipeline(MLContext mlContext)
     {
-        var categoryPipeline = mlContext.Transforms.Text.FeaturizeText("Description_tf", "Description")
-            .Append(mlContext.Transforms.Concatenate("Features", "Description_tf"))
-            .Append(mlContext.Transforms.Conversion.MapValueToKey("Label", "Category"))
+        var pipeline = mlContext.Transforms.Text.FeaturizeText("Features", nameof(TransactionData.Description))
+            .Append(mlContext.Transforms.Conversion.MapValueToKey(inputColumnName: "Category", outputColumnName: "Label"))
             .Append(mlContext.MulticlassClassification.Trainers.SdcaMaximumEntropy())
-            .Append(mlContext.Transforms.Conversion.MapKeyToValue("PredictedLabel", "Label"));
-        return categoryPipeline;
+            .Append(mlContext.Transforms.Conversion.MapKeyToValue("PredictedLabel"));
+        return pipeline;
     }
 
     private IEstimator<ITransformer> GetRecurringPipeline(MLContext mlContext)
     {
         var recurringPipeline = mlContext.Transforms.Text.FeaturizeText("Description_tf", "Description")
             .Append(mlContext.Transforms.Concatenate("Features", "Description_tf"))
-            .Append(mlContext.BinaryClassification.Trainers.SdcaLogisticRegression(labelColumnName: "IsRecurring"));
+            .Append(mlContext.BinaryClassification.Trainers.SdcaLogisticRegression("IsRecurring"));
         return recurringPipeline;
     }
 
@@ -79,5 +78,5 @@ public class TransactionCategorizer : ITransactionCategorizer
         [ColumnName("PredictedLabel")]
         public bool PredictedRecurring { get; set; }
     }
-    
+
 }
