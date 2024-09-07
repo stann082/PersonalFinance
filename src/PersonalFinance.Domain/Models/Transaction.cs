@@ -17,6 +17,7 @@ public class Transaction
     public string? Category { get; set; }
     public DateTime Date { get; private set; }
     public string? Description { get; private set; }
+    public bool IsRecurring { get; set; }
     public TransactionType TransactionType { get; private set; }
 
     #endregion

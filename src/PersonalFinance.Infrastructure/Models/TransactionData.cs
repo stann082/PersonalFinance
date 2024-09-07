@@ -11,4 +11,7 @@ public class TransactionData
     [LoadColumn(1)]
     public string Category { get; set; }
     
+    [LoadColumn(2)]
+    public bool IsRecurring { get; set; }
+    
 }
