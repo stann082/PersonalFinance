@@ -10,7 +10,7 @@ public class BankStatementParser : IBankStatementParser
 
     #region Public Methods
 
-    public async Task<ITransactionMap[]> Parse(string filePath)
+    public async Task<IParsedTransactionItem[]> Parse(string filePath)
     {
         StreamReader? reader = null;
         CsvReader? csv = null;
@@ -20,14 +20,16 @@ public class BankStatementParser : IBankStatementParser
             {
                 using (csv = new CsvReader(reader, CultureInfo.InvariantCulture))
                 {
-                    return await Task.FromResult(csv.GetRecords<BankOfAmericaTransactionMap>().ToArray());
+                    csv.Context.RegisterClassMap<ParsedTransactionItemMap>();
+                    var records = csv.GetRecords<ParsedTransactionItem>().ToArray();
+                    return await Task.FromResult(records);
                 }
             }
         }
         catch (Exception e)
         {
             // log error
-            return await Task.FromResult(Array.Empty<BankOfAmericaTransactionMap>());
+            return await Task.FromResult(Array.Empty<IParsedTransactionItem>());
         }
         finally
         {
