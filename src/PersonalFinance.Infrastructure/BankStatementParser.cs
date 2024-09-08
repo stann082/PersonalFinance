@@ -5,7 +5,7 @@ using PersonalFinance.Infrastructure.Models;
 
 namespace PersonalFinance.Infrastructure;
 
-public class BankOfAmericaStatementParser : IBankOfAmericaStatementParser
+public class BankStatementParser : IBankStatementParser
 {
 
     #region Public Methods

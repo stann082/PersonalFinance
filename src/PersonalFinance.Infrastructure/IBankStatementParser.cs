@@ -2,7 +2,7 @@
 
 namespace PersonalFinance.Infrastructure;
 
-public interface IBankOfAmericaStatementParser
+public interface IBankStatementParser
 {
     Task<ITransactionMap[]> Parse(string filePath);
 }

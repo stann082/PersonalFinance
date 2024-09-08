@@ -67,7 +67,7 @@ public class StatementService(IMongoClient mongoClient) : IStatementService
 
     private static Transaction CreateTransaction(TransactionDocument document)
     {
-        Transaction transaction = new Transaction();
+        Transaction transaction = new Transaction(default);
         
         return transaction;
     }

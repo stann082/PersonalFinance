@@ -16,7 +16,7 @@ public static class Program
         var services = new ServiceCollection()
             .AddSingleton<App>()
             .AddSingleton<IMongoClient>(_ => new MongoClient("mongodb://localhost:27017"))
-            .AddScoped<IBankOfAmericaStatementParser, BankOfAmericaStatementParser>()
+            .AddScoped<IBankStatementParser, BankStatementParser>()
             .AddScoped<IStatementService, StatementService>()
             .AddScoped<ITransactionCategorizer, TransactionCategorizer>()
             .BuildServiceProvider();

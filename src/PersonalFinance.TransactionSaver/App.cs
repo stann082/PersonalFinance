@@ -3,7 +3,7 @@ using PersonalFinance.Domain.Services;
 using PersonalFinance.Infrastructure;
 
 public class App(
-    IBankOfAmericaStatementParser statementParser,
+    IBankStatementParser statementParser,
     IStatementService statementService,
     ITransactionCategorizer transactionCategorizer)
 {
