@@ -5,15 +5,18 @@ namespace PersonalFinance.Domain.Models;
 public class Transaction
 {
 
+    #region Constructors
+
     public Transaction(ITransactionMap transactionMap)
     {
         InitializeProperties(transactionMap);
     }
 
+    #endregion
+
     #region Properties
 
     public decimal Amount { get; private set; }
-    public string? Bank { get; private set; }
     public string? Category { get; set; }
     public DateTime Date { get; private set; }
     public string? Description { get; private set; }
@@ -36,7 +39,6 @@ public class Transaction
     private void InitializeProperties(ITransactionMap transactionMap)
     {
         Amount = decimal.TryParse(transactionMap.Amount, out var amountResult) ? amountResult : 0;
-        Bank = Constants.BofA;
         Date = DateTime.TryParse(transactionMap.Date, out var dateResult) ? dateResult : DateTime.MinValue;
         Description = transactionMap.Description;
         TransactionType = Amount < 0 ? TransactionType.Debit : TransactionType.Credit;

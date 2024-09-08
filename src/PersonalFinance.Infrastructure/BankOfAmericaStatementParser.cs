@@ -27,7 +27,7 @@ public class BankOfAmericaStatementParser : IBankOfAmericaStatementParser
         catch (Exception e)
         {
             // log error
-            return await Task.FromResult(Array.Empty<ITransactionMap>());
+            return await Task.FromResult(Array.Empty<BankOfAmericaTransactionMap>());
         }
         finally
         {
