@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
+using MongoDB.Driver;
 using PersonalFinance.Application.Services;
 using PersonalFinance.Domain.Services;
 using PersonalFinance.Infrastructure;
@@ -14,7 +15,9 @@ public static class Program
     {
         var services = new ServiceCollection()
             .AddSingleton<App>()
-            .AddScoped<IBankOfAmericaStatementParser, BankOfAmericaStatementParser>()
+            .AddSingleton<IMongoDatabase>(_ => new MongoClient("mongodb://localhost:27017")
+                .GetDatabase("financial_data"))
+            .AddScoped<IBankStatementParser, BankStatementParser>()
             .AddScoped<IStatementService, StatementService>()
             .AddScoped<ITransactionCategorizer, TransactionCategorizer>()
             .BuildServiceProvider();

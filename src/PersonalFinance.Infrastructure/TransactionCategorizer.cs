@@ -8,15 +8,17 @@ namespace PersonalFinance.Infrastructure;
 public class TransactionCategorizer : ITransactionCategorizer
 {
 
-    public async Task CategorizeTransactions(string modelTrainingFilePath, IEnumerable<Transaction> transactions)
+    #region Public Methods
+
+    public async Task CategorizeAsync(string modelTrainingFilePath, IEnumerable<IParsedTransactionItem> transactions)
     {
         var mlContext = new MLContext();
-        var trainingDataView = mlContext.Data.LoadFromTextFile<TransactionData>(modelTrainingFilePath,
+        var trainingDataView = mlContext.Data.LoadFromTextFile<TransactionCategorizerData>(modelTrainingFilePath,
             hasHeader: false,
             separatorChar: ',');
 
         Console.WriteLine("Load and prepare data");
-        var loadedTransactions = mlContext.Data.CreateEnumerable<TransactionData>(trainingDataView, false).ToArray();
+        var loadedTransactions = mlContext.Data.CreateEnumerable<TransactionCategorizerData>(trainingDataView, false).ToArray();
         if (loadedTransactions.Select(t => t.Description).FirstOrDefault() == null)
         {
             Console.WriteLine("Description must have a value");
@@ -37,11 +39,11 @@ public class TransactionCategorizer : ITransactionCategorizer
         var recurringModel = recurringPipeline.Fit(trainingDataView);
 
         Console.WriteLine("Use the model for predictions");
-        var categoryPredictor = await Task.FromResult(mlContext.Model.CreatePredictionEngine<TransactionData, CategoryPrediction>(categoryModel));
-        var recurringPredictor = await Task.FromResult(mlContext.Model.CreatePredictionEngine<TransactionData, RecurringPrediction>(recurringModel));
-        foreach (Transaction transaction in transactions)
+        var categoryPredictor = await Task.FromResult(mlContext.Model.CreatePredictionEngine<TransactionCategorizerData, CategoryPrediction>(categoryModel));
+        var recurringPredictor = await Task.FromResult(mlContext.Model.CreatePredictionEngine<TransactionCategorizerData, RecurringPrediction>(recurringModel));
+        foreach (IParsedTransactionItem transaction in transactions)
         {
-            var transactionData = new TransactionData { Description = transaction.Description };
+            var transactionData = new TransactionCategorizerData { Description = transaction.Description };
             var categoryPrediction = categoryPredictor.Predict(transactionData);
             var recurringPrediction = recurringPredictor.Predict(transactionData);
 
@@ -50,13 +52,17 @@ public class TransactionCategorizer : ITransactionCategorizer
         }
     }
 
+    #endregion
+
+    #region Helper Methods
+
     private IEstimator<ITransformer> GetCategoryPipeline(MLContext mlContext)
     {
-        var pipeline = mlContext.Transforms.Text.FeaturizeText("Features", nameof(TransactionData.Description))
+        var categoryPipeline = mlContext.Transforms.Text.FeaturizeText("Features", nameof(TransactionCategorizerData.Description))
             .Append(mlContext.Transforms.Conversion.MapValueToKey(inputColumnName: "Category", outputColumnName: "Label"))
             .Append(mlContext.MulticlassClassification.Trainers.SdcaMaximumEntropy())
             .Append(mlContext.Transforms.Conversion.MapKeyToValue("PredictedLabel"));
-        return pipeline;
+        return categoryPipeline;
     }
 
     private IEstimator<ITransformer> GetRecurringPipeline(MLContext mlContext)
@@ -66,6 +72,10 @@ public class TransactionCategorizer : ITransactionCategorizer
             .Append(mlContext.BinaryClassification.Trainers.SdcaLogisticRegression("IsRecurring"));
         return recurringPipeline;
     }
+
+    #endregion
+
+    #region Helper Class
 
     private class CategoryPrediction
     {
@@ -78,5 +88,7 @@ public class TransactionCategorizer : ITransactionCategorizer
         [ColumnName("PredictedLabel")]
         public bool PredictedRecurring { get; set; }
     }
+
+    #endregion
 
 }

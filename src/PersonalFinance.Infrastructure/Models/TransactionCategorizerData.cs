@@ -2,7 +2,7 @@
 
 namespace PersonalFinance.Infrastructure.Models;
 
-public class TransactionData
+public class TransactionCategorizerData
 {
     
     [LoadColumn(0)]

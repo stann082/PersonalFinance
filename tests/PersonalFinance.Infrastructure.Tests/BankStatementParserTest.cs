@@ -1,14 +1,14 @@
 namespace PersonalFinance.Infrastructure.Tests;
 
-public class BankOfAmericaStatementParserTest
+public class BankStatementParserTest
 {
 
-    private IBankOfAmericaStatementParser _statementParser;
+    private IBankStatementParser _statementParser;
     
     [SetUp]
     public void SetUp()
     {
-        _statementParser = new BankOfAmericaStatementParser();
+        _statementParser = new BankStatementParser();
     }
     
     [Test]

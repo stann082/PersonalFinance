@@ -3,7 +3,7 @@ using PersonalFinance.Domain.Services;
 using PersonalFinance.Infrastructure;
 
 public class App(
-    IBankOfAmericaStatementParser statementParser,
+    IBankStatementParser statementParser,
     IStatementService statementService,
     ITransactionCategorizer transactionCategorizer)
 {
@@ -34,10 +34,9 @@ public class App(
             return 1;
         }
 
-        ITransactionMap[] transactionMap = await statementParser.Parse(statementFilePath);
-        Transaction[] transactions = transactionMap.Select(t => new Transaction(t)).ToArray();
-        await transactionCategorizer.CategorizeTransactions(categoryModelTrainingDataFilePath, transactions);
-        await statementService.Save(transactions);
+        IParsedTransactionItem[] transactions = await statementParser.Parse(statementFilePath);
+        await transactionCategorizer.CategorizeAsync(categoryModelTrainingDataFilePath, transactions);
+        await statementService.SaveAsync(transactions);
         return 0;
     }
 
