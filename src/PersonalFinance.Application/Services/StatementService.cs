@@ -5,26 +5,20 @@ using PersonalFinance.Domain.Services;
 
 namespace PersonalFinance.Application.Services;
 
-public class StatementService(IMongoClient mongoClient) : IStatementService
+public class StatementService(IMongoDatabase database) : IStatementService
 {
-
-    #region Variables
-
-    private readonly IMongoDatabase _database = mongoClient.GetDatabase("financial_data");
-
-    #endregion
 
     #region Public Methods
 
     public async Task<ITransaction[]> Get()
     {
-        var transactions = _database.GetCollection<Transaction>("transactions").AsQueryable().ToArray<ITransaction>();
+        var transactions = database.GetCollection<Transaction>("transactions").AsQueryable().ToArray<ITransaction>();
         return await Task.FromResult(transactions);
     }
 
     public async Task SaveAsync(IParsedTransactionItem[] parsedItems)
     {
-        var transactionsCollection = _database.GetCollection<Transaction>("transactions");
+        var transactionsCollection = database.GetCollection<Transaction>("transactions");
 
         int newTransactions = 0;
         int existingTransactions = 0;

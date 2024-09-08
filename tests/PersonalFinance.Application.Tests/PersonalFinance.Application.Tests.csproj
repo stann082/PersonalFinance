@@ -21,4 +21,8 @@
     <Using Include="NUnit.Framework" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\PersonalFinance.Application\PersonalFinance.Application.csproj" />
+  </ItemGroup>
+
 </Project>

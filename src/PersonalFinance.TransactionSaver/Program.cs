@@ -15,7 +15,8 @@ public static class Program
     {
         var services = new ServiceCollection()
             .AddSingleton<App>()
-            .AddSingleton<IMongoClient>(_ => new MongoClient("mongodb://localhost:27017"))
+            .AddSingleton<IMongoDatabase>(_ => new MongoClient("mongodb://localhost:27017")
+                .GetDatabase("financial_data"))
             .AddScoped<IBankStatementParser, BankStatementParser>()
             .AddScoped<IStatementService, StatementService>()
             .AddScoped<ITransactionCategorizer, TransactionCategorizer>()
