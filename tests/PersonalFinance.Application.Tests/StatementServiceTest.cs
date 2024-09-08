@@ -19,14 +19,16 @@ public class BankStatementParserTest
         _database.DropCollection("transactions");
     }
 
+    #region Blue Sky Tests
+
     [Test]
     public async Task BlueSkyTest_SaveAndFetchItems()
     {
         // Arrange
         var parsedItems = new IParsedTransactionItem[]
         {
-            new ParsedTransactionItemMock { Description = "Test 1", Amount = "100", Date = DateTime.UtcNow.ToShortDateString(), Balance = "500" },
-            new ParsedTransactionItemMock { Description = "Test 2", Amount = "200", Date = DateTime.UtcNow.ToShortDateString(), Balance = "700" }
+            new MockParsedTransactionItem { Description = "Test 1", Amount = "100", Date = DateTime.UtcNow.ToShortDateString(), Balance = "500" },
+            new MockParsedTransactionItem { Description = "Test 2", Amount = "200", Date = DateTime.UtcNow.ToShortDateString(), Balance = "700" }
         };
 
         // Act
@@ -38,13 +40,17 @@ public class BankStatementParserTest
         Assert.That(savedTransactions.Count, Is.EqualTo(2));
     }
 
+    #endregion
+
     [TearDown]
     public void TearDown()
     {
         _client.DropDatabase("financial_data_test");
     }
 
-    private class ParsedTransactionItemMock : IParsedTransactionItem
+    #region Mock Classes
+
+    private class MockParsedTransactionItem : IParsedTransactionItem
     {
         public string? Description { get; set; }
         public bool? IsRecurring { get; set; }
@@ -55,5 +61,7 @@ public class BankStatementParserTest
 
         public string? Balance { get; set; }
     }
+
+    #endregion
 
 }
