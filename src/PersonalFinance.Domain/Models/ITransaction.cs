@@ -6,6 +6,7 @@ public interface ITransaction
 {
     
     decimal Amount { get; }
+    decimal Balance { get; }
     string? Category { get; }
     DateTime Date { get; }
     string? Description { get; }

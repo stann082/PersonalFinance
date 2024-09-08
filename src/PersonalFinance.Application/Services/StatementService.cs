@@ -35,12 +35,15 @@ public class StatementService(IMongoClient mongoClient) : IStatementService
             var filter = Builders<Transaction>.Filter.And(
                 Builders<Transaction>.Filter.Eq(f => f.Description, transaction.Description),
                 Builders<Transaction>.Filter.Eq(f => f.Amount, transaction.Amount),
-                Builders<Transaction>.Filter.Eq(f => f.Date, transaction.Date)
+                Builders<Transaction>.Filter.Eq(f => f.Date, transaction.Date),
+                Builders<Transaction>.Filter.Eq(f => f.Balance, transaction.Balance)
             );
 
             var existingTransaction = await transactionsCollection.Find(filter).FirstOrDefaultAsync();
             if (existingTransaction != null)
             {
+                // TODO: Add a flag to show this
+                // Console.WriteLine($"Transaction already exists: {existingTransaction}");
                 existingTransactions++;
                 continue;
             }
