@@ -4,6 +4,6 @@ namespace PersonalFinance.Domain.Services;
 
 public interface IStatementService
 {
-    Task<ITransaction[]> Get();
+    Task<ITransaction[]> GetAsync(ISearchOptions? searchOptions = null);
     Task SaveAsync(IParsedTransactionItem[] parsedItems);
 }

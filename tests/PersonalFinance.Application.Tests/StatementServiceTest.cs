@@ -36,7 +36,7 @@ public class BankStatementParserTest
         await service.SaveAsync(parsedItems);
 
         // Assert
-        var savedTransactions = await service.Get();
+        var savedTransactions = await service.GetAsync();
         Assert.That(savedTransactions.Count, Is.EqualTo(2));
     }
 

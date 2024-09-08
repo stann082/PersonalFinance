@@ -10,10 +10,15 @@ public class StatementService(IMongoDatabase database) : IStatementService
 
     #region Public Methods
 
-    public async Task<ITransaction[]> Get()
+    public async Task<ITransaction[]> GetAsync(ISearchOptions? searchOptions = null)
     {
-        var transactions = database.GetCollection<Transaction>("transactions").AsQueryable().ToArray<ITransaction>();
-        return await Task.FromResult(transactions);
+        IEnumerable<ITransaction> transactions = database.GetCollection<Transaction>("transactions").AsQueryable().ToArray<ITransaction>();
+        if (searchOptions == null)
+        {
+            return transactions.ToArray();
+        }
+        
+        return await Task.FromResult(transactions.ToArray());
     }
 
     public async Task SaveAsync(IParsedTransactionItem[] parsedItems)
