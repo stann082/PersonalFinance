@@ -34,7 +34,7 @@ public class Transaction : ITransaction
 
     public override string ToString()
     {
-        return $"{Date}: {Description}";
+        return $"{Date.ToShortDateString()}: {Description}";
     }
 
     #endregion
