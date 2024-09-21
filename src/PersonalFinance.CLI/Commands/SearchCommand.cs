@@ -11,46 +11,56 @@ public class SearchCommand(SearchOptions options, IStatementService service)
 
     public async Task<int> Execute()
     {
-        IEnumerable<ITransaction> transactions = await service.GetAsync();
+        IEnumerable<ITransaction> allTransactions = await service.GetAsync();
 
         DateTime startDate = DateTime.TryParse(options.GetFilterValue("after"), out DateTime beforeDate) ? beforeDate : DateTime.MinValue;
         DateTime stopDate = DateTime.TryParse(options.GetFilterValue("before"), out DateTime afterDate) ? afterDate : DateTime.MaxValue;
-        bool? isRecurring = bool.TryParse(options.GetFilterValue("recurring"), out bool recurring) ? recurring : null;
-        transactions = transactions.Where(t => t.Date >= startDate && t.Date <= stopDate);
+        ITransaction[] periodTransactions = allTransactions.Where(t => t.Date >= startDate && t.Date <= stopDate).ToArray();
 
+        IEnumerable<ITransaction> filteredTransactions = periodTransactions;
+        bool? isRecurring = bool.TryParse(options.GetFilterValue("recurring"), out bool recurring) ? recurring : null;
         if (isRecurring.HasValue)
         {
-            transactions = transactions.Where(t => t.IsRecurring == isRecurring.Value);
+            filteredTransactions = filteredTransactions.Where(t => t.IsRecurring == isRecurring.Value).ToArray();
         }
 
         int? wrap = int.TryParse(options.GetFilterValue("wrap"), out int wrapLength) ? wrapLength : null;
+        FormatAndPrintTransactions(filteredTransactions, wrap);
 
-        ITransaction[] transactionCollection = transactions.ToArray();
-        FormatAndPrintTransactions(transactionCollection, wrap);
-
-        var debits = transactionCollection.Where(t => t.Amount < 0).Select(t => Math.Abs(t.Amount)).Sum();
-        var credits = transactionCollection.Where(t => t.Amount > 0).Select(t => t.Amount).Sum();
-        Console.WriteLine($"\n   Total debits: ${Math.Abs(debits):N2}");
-        Console.WriteLine($"  Total credits: ${credits:N2}");
-        Console.WriteLine($"\n            Money spent: ${credits - debits:N2}");
-
-        var recurringDebits = transactionCollection.Where(t => t is { Amount: < 0, IsRecurring: true })
-            .Select(t => Math.Abs(t.Amount)).Sum();
-        Console.WriteLine($"       Recurring debits: ${recurringDebits:N2}");
-        
-        var nonRecurringDebits = transactionCollection.Where(t => t is { Amount: < 0, IsRecurring: false })
-            .Select(t => Math.Abs(t.Amount)).Sum();
-        Console.WriteLine($"   Non-recurring debits: ${nonRecurringDebits:N2}");
-        
-        Console.ForegroundColor = ConsoleColor.Red;
-        Console.WriteLine("\nCredits are in highlighted in red\n");
-        Console.ResetColor();
+        DisplayTotals(periodTransactions, filteredTransactions.ToArray());
         return await Task.FromResult(0);
     }
 
     #endregion
 
     #region Helper Methods
+
+    private static void DisplayTotals(ITransaction[] periodTransactions, ITransaction[] filteredTransactions)
+    {
+        var debits = periodTransactions.Where(t => t.Amount < 0).Select(t => Math.Abs(t.Amount)).Sum();
+        var credits = periodTransactions.Where(t => t.Amount > 0).Select(t => t.Amount).Sum();
+        Console.WriteLine($"\n   Total debits: ${Math.Abs(debits):N2}");
+        Console.WriteLine($"  Total credits: ${credits:N2}");
+        Console.WriteLine($"\n            Net balance: ${credits - debits:N2}");
+
+        var recurringDebits = filteredTransactions.Where(t => t is { Amount: < 0, IsRecurring: true })
+            .Select(t => t.Amount).Sum();
+        if (recurringDebits != 0)
+        {
+            Console.WriteLine($"       Recurring debits: ${Math.Abs(recurringDebits):N2}");
+        }
+
+        var nonRecurringDebits = filteredTransactions.Where(t => t is { Amount: < 0, IsRecurring: false })
+            .Select(t => t.Amount).Sum();
+        if (nonRecurringDebits != 0)
+        {
+            Console.WriteLine($"   Non-recurring debits: ${Math.Abs(nonRecurringDebits):N2}");
+        }
+
+        Console.ForegroundColor = ConsoleColor.Red;
+        Console.WriteLine("\nCredits are in highlighted in red\n");
+        Console.ResetColor();
+    }
 
     private static void FormatAndPrintTransactions(IEnumerable<ITransaction> transactions, int? wrapLength)
     {
