@@ -65,6 +65,7 @@ public class BankStatementParserTest
     private class MockSavedOptions : ISaveOptions
     {
 
+        public bool Review => false;
         public bool Verbose => false;
     }
 

@@ -45,11 +45,38 @@ public class StatementService(IMongoDatabase database) : IStatementService
                 string consoleMessage;
                 if (existingTransaction.IsRecurring != transaction.IsRecurring)
                 {
-                    var update = Builders<Transaction>.Update.Set(u => u.IsRecurring, transaction.IsRecurring);
-                    await transactionsCollection.UpdateOneAsync(filter, update);
+                    if (saveOptions.Review)
+                    {
+                        Console.WriteLine($"{existingTransaction}; Recurring status: {existingTransaction.IsRecurring}");
+                        Console.Write($"Would you like to update this transaction with {transaction.IsRecurring}? (Y/N): ");
+                        string? input = Console.ReadLine();
+                        while (input == null || (!input.Equals("Y", StringComparison.OrdinalIgnoreCase) && !input.Equals("N", StringComparison.OrdinalIgnoreCase)))
+                        {
+                            Console.WriteLine("Invalid input. Please enter 'Y' or 'N'.");
+                            input = Console.ReadLine();
+                        }
 
-                    consoleMessage = $"Updated recurring status for: {existingTransaction}";
-                    updatedTransactions++;
+                        if (input.Equals("Y", StringComparison.OrdinalIgnoreCase))
+                        {
+                            var update = Builders<Transaction>.Update.Set(u => u.IsRecurring, transaction.IsRecurring);
+                            await transactionsCollection.UpdateOneAsync(filter, update);
+
+                            consoleMessage = $"Updated recurring status for: {existingTransaction}";
+                            updatedTransactions++;
+                        }
+                        else
+                        {
+                            continue;
+                        }
+                    }
+                    else
+                    {
+                        var update = Builders<Transaction>.Update.Set(u => u.IsRecurring, transaction.IsRecurring);
+                        await transactionsCollection.UpdateOneAsync(filter, update);
+
+                        consoleMessage = $"Updated recurring status for: {existingTransaction}";
+                        updatedTransactions++;
+                    }
                 }
                 else
                 {
@@ -57,7 +84,7 @@ public class StatementService(IMongoDatabase database) : IStatementService
                     existingTransactions++;
                 }
 
-                if (saveOptions.Verbose || updatedTransactions > 0)
+                if ((saveOptions.Verbose || updatedTransactions > 0) && !string.IsNullOrWhiteSpace(consoleMessage))
                 {
                     Console.WriteLine(consoleMessage);
                 }
