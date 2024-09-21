@@ -43,14 +43,14 @@ public class SearchCommand(SearchOptions options, IStatementService service)
         Console.WriteLine($"  Total credits: ${credits:N2}");
         Console.WriteLine($"\n            Net balance: ${credits - debits:N2}");
 
-        var recurringDebits = filteredTransactions.Where(t => t is { Amount: < 0, IsRecurring: true })
+        var recurringDebits = filteredTransactions.Where(t => t is { IsRecurring: true })
             .Select(t => t.Amount).Sum();
         if (recurringDebits != 0)
         {
             Console.WriteLine($"       Recurring debits: ${Math.Abs(recurringDebits):N2}");
         }
 
-        var nonRecurringDebits = filteredTransactions.Where(t => t is { Amount: < 0, IsRecurring: false })
+        var nonRecurringDebits = filteredTransactions.Where(t => t is { IsRecurring: false })
             .Select(t => t.Amount).Sum();
         if (nonRecurringDebits != 0)
         {
