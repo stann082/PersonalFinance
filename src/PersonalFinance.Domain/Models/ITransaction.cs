@@ -10,7 +10,7 @@ public interface ITransaction
     string? Category { get; }
     DateTime Date { get; }
     string? Description { get; }
-    bool? IsRecurring { get; }
+    bool IsRecurring { get; }
     string? TransactionId { get; }
     TransactionType TransactionType { get; }
     

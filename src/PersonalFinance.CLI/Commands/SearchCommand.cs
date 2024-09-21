@@ -22,10 +22,29 @@ public class SearchCommand(SearchOptions options, IStatementService service)
         {
             transactions = transactions.Where(t => t.IsRecurring == isRecurring.Value);
         }
-        
+
         int? wrap = int.TryParse(options.GetFilterValue("wrap"), out int wrapLength) ? wrapLength : null;
-        FormatAndPrintTransactions(transactions, wrap);
+
+        ITransaction[] transactionCollection = transactions.ToArray();
+        FormatAndPrintTransactions(transactionCollection, wrap);
+
+        var debits = transactionCollection.Where(t => t.Amount < 0).Select(t => Math.Abs(t.Amount)).Sum();
+        var credits = transactionCollection.Where(t => t.Amount > 0).Select(t => t.Amount).Sum();
+        Console.WriteLine($"\n   Total debits: ${Math.Abs(debits):N2}");
+        Console.WriteLine($"  Total credits: ${credits:N2}");
+        Console.WriteLine($"\n            Money spent: ${credits - debits:N2}");
+
+        var recurringDebits = transactionCollection.Where(t => t is { Amount: < 0, IsRecurring: true })
+            .Select(t => Math.Abs(t.Amount)).Sum();
+        Console.WriteLine($"       Recurring debits: ${recurringDebits:N2}");
         
+        var nonRecurringDebits = transactionCollection.Where(t => t is { Amount: < 0, IsRecurring: false })
+            .Select(t => Math.Abs(t.Amount)).Sum();
+        Console.WriteLine($"   Non-recurring debits: ${nonRecurringDebits:N2}");
+        
+        Console.ForegroundColor = ConsoleColor.Red;
+        Console.WriteLine("\nCredits are in highlighted in red\n");
+        Console.ResetColor();
         return await Task.FromResult(0);
     }
 
@@ -49,13 +68,18 @@ public class SearchCommand(SearchOptions options, IStatementService service)
         int length = wrapLength ?? 500;
         int limitTo = length - 3;
         int maxAmountLength = parsedTransactions.Max(t => t.Amount.Length);
-        foreach (var output in from t in parsedTransactions
-                 let formattedAmount = t.Amount.PadLeft(maxAmountLength)
-                 let formattedDescription = t.Description.Length > length
-                     ? t.Description[..limitTo] + "..."
-                     : t.Description select $"{t.Date}\t{formattedAmount}\t{formattedDescription}")
+
+        foreach (var t in parsedTransactions)
         {
-            Console.WriteLine(output);
+            string formattedAmount = t.Amount.PadLeft(maxAmountLength);
+            string formattedDescription = t.Description.Length > length
+                ? t.Description[..limitTo] + "..."
+                : t.Description;
+
+            bool isCredit = !formattedAmount.Contains('-');
+            Console.ForegroundColor = isCredit ? ConsoleColor.Red : ConsoleColor.Gray;
+            Console.WriteLine($"{t.Date}\t{formattedAmount}\t{formattedDescription}");
+            Console.ResetColor();
         }
     }
 

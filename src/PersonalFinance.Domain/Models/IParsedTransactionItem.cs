@@ -7,5 +7,5 @@ public interface IParsedTransactionItem
     string Category { get; set; }
     string Date { get; }
     string? Description { get; }
-    bool? IsRecurring { get; set;  }
+    bool IsRecurring { get; set;  }
 }
