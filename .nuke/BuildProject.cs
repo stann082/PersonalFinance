@@ -96,6 +96,7 @@ class BuildProject : NukeBuild
 
     Target Publish => _ => _
         .Before(Deploy)
+        .DependsOn(Restore, Build)
         .Executes(() =>
         {
             DotNetTasks.DotNetPublish(s => s
