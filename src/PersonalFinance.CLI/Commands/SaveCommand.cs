@@ -1,16 +1,17 @@
-﻿using PersonalFinance.Domain.Models;
+﻿using PersonalFinance.CLI.Options;
+using PersonalFinance.Domain.Models;
 using PersonalFinance.Domain.Services;
 using PersonalFinance.Infrastructure;
 
-public class App(
+namespace PersonalFinance.CLI.Commands;
+
+public class SaveCommand(SaveOptions options, 
     IBankStatementParser statementParser,
     IStatementService statementService,
     ITransactionCategorizer transactionCategorizer)
 {
 
-    #region Public Methods
-
-    public async Task<int> RunApp(IEnumerable<string> args)
+    public async Task<int> Execute()
     {
         string? oneDrivePath = Environment.GetEnvironmentVariable("OneDrive");
         if (oneDrivePath == null)
@@ -39,7 +40,5 @@ public class App(
         await statementService.SaveAsync(transactions);
         return 0;
     }
-
-    #endregion
-
+    
 }
