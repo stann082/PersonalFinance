@@ -27,6 +27,7 @@ public class StatementService(IMongoDatabase database) : IStatementService
 
         int newTransactions = 0;
         int existingTransactions = 0;
+        int updatedTransactions = 0;
 
         var transactions = parsedItems.Select(i => new Transaction(i)).ToArray();
         foreach (Transaction transaction in transactions)
@@ -41,12 +42,26 @@ public class StatementService(IMongoDatabase database) : IStatementService
             var existingTransaction = await transactionsCollection.Find(filter).FirstOrDefaultAsync();
             if (existingTransaction != null)
             {
-                if (saveOptions.Verbose)
+                string consoleMessage;
+                if (existingTransaction.IsRecurring != transaction.IsRecurring)
                 {
-                    Console.WriteLine($"Transaction already exists: {existingTransaction}");
+                    var update = Builders<Transaction>.Update.Set(u => u.IsRecurring, transaction.IsRecurring);
+                    await transactionsCollection.UpdateOneAsync(filter, update);
+
+                    consoleMessage = $"Updated recurring status for: {existingTransaction}";
+                    updatedTransactions++;
+                }
+                else
+                {
+                    consoleMessage = $"Transaction already exists with correct recurring status: {existingTransaction}";
+                    existingTransactions++;
                 }
 
-                existingTransactions++;
+                if (saveOptions.Verbose || updatedTransactions > 0)
+                {
+                    Console.WriteLine(consoleMessage);
+                }
+
                 continue;
             }
 
@@ -54,7 +69,7 @@ public class StatementService(IMongoDatabase database) : IStatementService
             await transactionsCollection.InsertOneAsync(transaction);
         }
 
-        Console.WriteLine($"Saved {newTransactions} new transactions. Skipped {existingTransactions} transactions that were already saved.");
+        Console.WriteLine($"Saved {newTransactions} new transactions. Updated {updatedTransactions} transactions. Skipped {existingTransactions} transactions that were already correct.");
     }
 
     #endregion
