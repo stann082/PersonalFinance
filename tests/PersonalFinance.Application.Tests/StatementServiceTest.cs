@@ -33,7 +33,7 @@ public class BankStatementParserTest
 
         // Act
         IStatementService service = new StatementService(_database);
-        await service.SaveAsync(parsedItems);
+        await service.SaveAsync(parsedItems, new MockSavedOptions());
 
         // Assert
         var savedTransactions = await service.GetAsync();
@@ -60,6 +60,12 @@ public class BankStatementParserTest
         public string? Date { get; set; }
 
         public string? Balance { get; set; }
+    }
+
+    private class MockSavedOptions : ISaveOptions
+    {
+
+        public bool Verbose => false;
     }
 
     #endregion

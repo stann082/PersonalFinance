@@ -17,11 +17,11 @@ public class StatementService(IMongoDatabase database) : IStatementService
         {
             return transactions.ToArray();
         }
-        
+
         return await Task.FromResult(transactions.ToArray());
     }
 
-    public async Task SaveAsync(IParsedTransactionItem[] parsedItems)
+    public async Task SaveAsync(IParsedTransactionItem[] parsedItems, ISaveOptions saveOptions)
     {
         var transactionsCollection = database.GetCollection<Transaction>("transactions");
 
@@ -41,8 +41,11 @@ public class StatementService(IMongoDatabase database) : IStatementService
             var existingTransaction = await transactionsCollection.Find(filter).FirstOrDefaultAsync();
             if (existingTransaction != null)
             {
-                // TODO: Add a flag to show this
-                // Console.WriteLine($"Transaction already exists: {existingTransaction}");
+                if (saveOptions.Verbose)
+                {
+                    Console.WriteLine($"Transaction already exists: {existingTransaction}");
+                }
+
                 existingTransactions++;
                 continue;
             }

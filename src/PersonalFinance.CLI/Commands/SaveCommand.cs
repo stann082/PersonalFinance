@@ -37,7 +37,7 @@ public class SaveCommand(SaveOptions options,
 
         IParsedTransactionItem[] transactions = await statementParser.Parse(statementFilePath);
         await transactionCategorizer.CategorizeAsync(categoryModelTrainingDataFilePath, transactions);
-        await statementService.SaveAsync(transactions);
+        await statementService.SaveAsync(transactions, options);
         return 0;
     }
     

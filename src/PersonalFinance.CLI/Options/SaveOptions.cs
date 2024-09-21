@@ -1,6 +1,11 @@
-﻿namespace PersonalFinance.CLI.Options;
+﻿using CommandLine;
+using PersonalFinance.Domain.Models;
 
-public class SaveOptions
+namespace PersonalFinance.CLI.Options;
+
+[Verb("save", HelpText = "Save transactions in the database.")]
+public class SaveOptions : ISaveOptions
 {
-    
+    [Option('v', "verbose", HelpText = "Show details")]
+    public bool Verbose { get; set; }
 }
