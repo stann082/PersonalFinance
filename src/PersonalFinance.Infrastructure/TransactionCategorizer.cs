@@ -80,7 +80,7 @@ public class TransactionCategorizer : ITransactionCategorizer
     private class CategoryPrediction
     {
         [ColumnName("PredictedLabel")]
-        public string PredictedCategory { get; set; }
+        public string? PredictedCategory { get; set; }
     }
 
     private class RecurringPrediction

@@ -9,7 +9,7 @@ public class TransactionCategorizerData
     public string? Description { get; set; }
 
     [LoadColumn(1)]
-    public string Category { get; set; }
+    public string? Category { get; set; }
     
     [LoadColumn(2)]
     public bool IsRecurring { get; set; }
