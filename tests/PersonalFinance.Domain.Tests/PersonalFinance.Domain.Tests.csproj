@@ -27,4 +27,8 @@
     <Using Include="NUnit.Framework" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\PersonalFinance.Domain\PersonalFinance.Domain.csproj" />
+  </ItemGroup>
+
 </Project>
