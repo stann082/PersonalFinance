@@ -46,7 +46,6 @@ public class TransactionCategorizer : ITransactionCategorizer
             var transactionData = new TransactionCategorizerData { Description = transaction.Description };
             var categoryPrediction = categoryPredictor.Predict(transactionData);
             var recurringPrediction = recurringPredictor.Predict(transactionData);
-
             transaction.Category = categoryPrediction.PredictedCategory;
             transaction.IsRecurring = recurringPrediction.PredictedRecurring;
         }
@@ -56,7 +55,7 @@ public class TransactionCategorizer : ITransactionCategorizer
 
     #region Helper Methods
 
-    private IEstimator<ITransformer> GetCategoryPipeline(MLContext mlContext)
+    private static IEstimator<ITransformer> GetCategoryPipeline(MLContext mlContext)
     {
         var categoryPipeline = mlContext.Transforms.Text.FeaturizeText("Features", nameof(TransactionCategorizerData.Description))
             .Append(mlContext.Transforms.Conversion.MapValueToKey(inputColumnName: "Category", outputColumnName: "Label"))
