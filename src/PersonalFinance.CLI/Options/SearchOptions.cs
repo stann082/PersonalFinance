@@ -15,6 +15,9 @@ public class SearchOptions : ISearchOptions
     [Option('q', "query", HelpText = "Search for a specific item.")]
     public string Query { get; set; } = string.Empty;
 
+    [Option("pay-period", HelpText = "Enter the pay period (e.g., \"September2024\"")]
+    public string PayPeriod { get; set; } = string.Empty;
+
     #endregion
 
     #region Properties

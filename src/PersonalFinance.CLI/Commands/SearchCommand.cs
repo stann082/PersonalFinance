@@ -2,19 +2,41 @@
 using PersonalFinance.Domain.Misc;
 using PersonalFinance.Domain.Models;
 using PersonalFinance.Domain.Services;
+using PersonalFinance.Domain.Util;
 
 namespace PersonalFinance.CLI.Commands;
 
 public class SearchCommand(SearchOptions options, IStatementService service)
 {
+
+    #region Constants
+
+    private const string PayPeriodDescription = "TIMECLOCK PLUS L DES:DIRECT DEP";
+
+    #endregion
+    
     #region Public Methods
 
     public async Task<int> Execute()
     {
         IEnumerable<ITransaction> allTransactions = await service.GetAsync();
 
-        var startDate = DateTime.TryParse(options.GetFilterValue("after"), out var beforeDate) ? beforeDate : DateTime.MinValue;
-        var stopDate = DateTime.TryParse(options.GetFilterValue("before"), out var afterDate) ? afterDate : DateTime.MaxValue;
+        DateTime startDate;
+        DateTime stopDate;
+        if (string.IsNullOrEmpty(options.PayPeriod))
+        {
+            startDate = DateTime.TryParse(options.GetFilterValue("after"), out var beforeDate) ? beforeDate : DateTime.MinValue;
+            stopDate = DateTime.TryParse(options.GetFilterValue("before"), out var afterDate) ? afterDate : DateTime.MaxValue;
+        }
+        else
+        {
+            ITransaction[] allTransactionArray = allTransactions.ToArray();
+            var payPeriodCalculator = new PayPeriodCalculator();
+            (string? startDateId, string? endDateId) = payPeriodCalculator.Calculate(allTransactionArray, options.PayPeriod, PayPeriodDescription);
+            startDate = allTransactionArray.FirstOrDefault(t => t.TransactionId == startDateId)?.Date ?? DateTime.MinValue;
+            stopDate = allTransactionArray.FirstOrDefault(t => t.TransactionId == endDateId)?.Date ?? DateTime.MaxValue;
+        }
+        
         var periodTransactions = allTransactions.Where(t => t.Date >= startDate && t.Date <= stopDate).ToArray();
 
         IEnumerable<ITransaction> filteredTransactions = periodTransactions;
