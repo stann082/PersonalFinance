@@ -33,10 +33,10 @@ public class BankStatementParserTest
 
         // Act
         IStatementService service = new StatementService(_database);
-        await service.SaveAsync(parsedItems);
+        await service.SaveAsync(parsedItems, new MockSavedOptions());
 
         // Assert
-        var savedTransactions = await service.Get();
+        var savedTransactions = await service.GetAsync();
         Assert.That(savedTransactions.Count, Is.EqualTo(2));
     }
 
@@ -53,13 +53,20 @@ public class BankStatementParserTest
     private class MockParsedTransactionItem : IParsedTransactionItem
     {
         public string? Description { get; set; }
-        public bool? IsRecurring { get; set; }
+        public bool IsRecurring { get; set; }
         public string? Amount { get; set; }
 
         public string? Category { get; set; }
         public string? Date { get; set; }
 
         public string? Balance { get; set; }
+    }
+
+    private class MockSavedOptions : ISaveOptions
+    {
+
+        public bool Review => false;
+        public bool Verbose => false;
     }
 
     #endregion

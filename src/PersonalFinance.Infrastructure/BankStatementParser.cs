@@ -26,7 +26,7 @@ public class BankStatementParser : IBankStatementParser
                 }
             }
         }
-        catch (Exception e)
+        catch (Exception)
         {
             // log error
             return await Task.FromResult(Array.Empty<IParsedTransactionItem>());
