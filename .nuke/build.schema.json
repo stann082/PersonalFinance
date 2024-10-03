@@ -1,14 +1,6 @@
 {
   "$schema": "http://json-schema.org/draft-04/schema#",
   "properties": {
-    "Configuration": {
-      "type": "string",
-      "description": "Configuration to build - Default is 'Debug' (local) or 'Release' (server)",
-      "enum": [
-        "Debug",
-        "Release"
-      ]
-    },
     "DotNetVerbosityLevel": {
       "type": "string",
       "description": "Verbosity level of the build output - Default is 'Minimal'",
@@ -56,13 +48,9 @@
     "ExecutableTarget": {
       "type": "string",
       "enum": [
-        "Build",
-        "Clean",
         "DeepClean",
         "Deploy",
         "Publish",
-        "Rebuild",
-        "Restore",
         "Test"
       ]
     },

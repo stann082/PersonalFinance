@@ -15,9 +15,6 @@ class BuildProject : NukeBuild
 
     #region Parameters
 
-    [Parameter("Configuration to build - Default is 'Debug' (local) or 'Release' (server)")]
-    readonly Configuration Configuration = Configuration.Debug;
-
     [Parameter("Verbosity level of the build output - Default is 'Minimal'")]
     readonly DotNetVerbosity DotNetVerbosityLevel = DotNetVerbosity.quiet;
     
@@ -31,28 +28,7 @@ class BuildProject : NukeBuild
 
     #region Targets
 
-    Target Clean => _ => _
-        .Before(Build)
-        .Executes(() =>
-        {
-            DotNetTasks.DotNetClean(s => s
-                .SetConfiguration(Configuration)
-                .SetVerbosity(DotNetVerbosityLevel)
-                .SetProject(RootDirectory / "PersonalFinance.sln"));
-        });
-
-    Target Build => _ => _
-        .Executes(() =>
-        {
-            DotNetTasks.DotNetBuild(s => s
-                .SetConfiguration(Configuration)
-                .SetProjectFile(RootDirectory / "PersonalFinance.sln")
-                .SetVerbosity(DotNetVerbosityLevel)
-                .EnableNoRestore());
-        });
-
     Target DeepClean => _ => _
-        .Before(Restore)
         .Executes(() =>
         {
             var binAndObjDirectories = RootDirectory.GlobDirectories("**/bin", "**/obj")
@@ -73,49 +49,38 @@ class BuildProject : NukeBuild
         });
 
     Target Deploy => _ => _
-        .DependsOn(Publish)
+        .DependsOn(Test, Publish)
         .Executes(() =>
         {
-            // var appDataPath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
-            // var targetDirectory = Path.Combine(appDataPath, "utils");
-            // if (!Directory.Exists(targetDirectory))
-            // {
-            //     Directory.CreateDirectory(targetDirectory);
-            // }
-            //
-            // var targetFile = Path.Combine(targetDirectory, "gamespace.exe");
-            // if (File.Exists(targetFile))
-            // {
-            //     File.Delete(targetFile);
-            // }
-            //
-            // var sourceFile = RootDirectory / "pub" / "gamespace.exe";
-            // File.Copy(sourceFile, targetFile);
-            // Log.Information("Deployed gamespace.exe to {TargetDirectory}", targetDirectory);
+            var appDataPath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
+            var targetDirectory = Path.Combine(appDataPath, "utils");
+            if (!Directory.Exists(targetDirectory))
+            {
+                Directory.CreateDirectory(targetDirectory);
+            }
+
+            const string fileName = "fin.exe";
+            var targetFile = Path.Combine(targetDirectory, fileName);
+            if (File.Exists(targetFile))
+            {
+                File.Delete(targetFile);
+            }
+            
+            var sourceFile = RootDirectory / "pub" / "PersonalFinance.CLI.exe";
+            File.Copy(sourceFile, targetFile);
+            Log.Information("Deployed {TargetFile} to {TargetDirectory}", fileName, targetDirectory);
         });
 
     Target Publish => _ => _
+        .DependsOn(DeepClean)
         .Before(Deploy)
-        .DependsOn(Restore, Build)
         .Executes(() =>
         {
             DotNetTasks.DotNetPublish(s => s
                 .SetProject(RootDirectory / "PersonalFinance.sln")
-                .SetConfiguration(Configuration)
+                .SetConfiguration(Configuration.Release)
                 .SetVerbosity(DotNetVerbosityLevel)
                 .SetOutput(RootDirectory / "pub"));
-        });
-
-    Target Rebuild => _ => _
-        .DependsOn(DeepClean, Restore, Clean, Build);
-            
-    Target Restore => _ => _
-        .Before(Clean)
-        .Executes(() =>
-        {
-            DotNetTasks.DotNetRestore(s => s
-                .SetVerbosity(DotNetVerbosityLevel)
-                .SetProjectFile(RootDirectory / "PersonalFinance.sln"));
         });
 
     Target Test => _ => _
@@ -125,9 +90,7 @@ class BuildProject : NukeBuild
             {
                 DotNetTasks.DotNetTest(s => s
                     .SetProjectFile(project)
-                    .SetConfiguration(Configuration)
-                    .SetVerbosity(DotNetVerbosityLevel)
-                    .EnableNoBuild());
+                    .SetVerbosity(DotNetVerbosityLevel));
             });
         });
 
@@ -141,6 +104,7 @@ class BuildProject : NukeBuild
             :
             [
                 RootDirectory / "tests" / "PersonalFinance.Application.Tests" / "PersonalFinance.Application.Tests.csproj",
+                RootDirectory / "tests" / "PersonalFinance.Domain.Tests" / "PersonalFinance.Domain.Tests.csproj",
                 RootDirectory / "tests" / "PersonalFinance.Infrastructure.Tests" / "PersonalFinance.Infrastructure.Tests.csproj"
             ];
 
