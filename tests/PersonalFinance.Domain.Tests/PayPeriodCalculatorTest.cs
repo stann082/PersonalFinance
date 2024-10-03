@@ -33,6 +33,28 @@ public class PayPeriodCalculatorTest
         });
     }
 
+    [Test]
+    public void BlueSkyTest_Parse_IncompleteMonth()
+    {
+        // setup
+        var transactions = new List<ITransaction>();
+        transactions.Add(new MockTransaction { TransactionId = "1XX01", Description = "DoorDash", Date = new DateTime(2024, 8, 27) });
+        transactions.Add(new MockTransaction { TransactionId = "1XX02", Description = "MYORG", Date = new DateTime(2024, 8, 30) });
+        transactions.Add(new MockTransaction { TransactionId = "1XX03", Description = "Mortgage", Date = new DateTime(2024, 9, 1) });
+        transactions.Add(new MockTransaction { TransactionId = "1XX04", Description = "PetSmart", Date = new DateTime(2024, 9, 5) });
+
+        // exercise
+        var calculator = new PayPeriodCalculator();
+        var (startDateId, endDateId) = calculator.Calculate(transactions.ToArray(), "September2024", "MYORG");
+
+        // post-conditions
+        Assert.Multiple(() =>
+        {
+            Assert.That(startDateId, Is.EqualTo("1XX02"));
+            Assert.That(endDateId, Is.EqualTo("1XX04"));
+        });
+    }
+
     #endregion
 
     #region Helper Classes
