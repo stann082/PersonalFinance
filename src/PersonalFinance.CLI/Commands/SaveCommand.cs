@@ -1,4 +1,5 @@
-﻿using PersonalFinance.CLI.Options;
+﻿using System.Text.RegularExpressions;
+using PersonalFinance.CLI.Options;
 using PersonalFinance.Domain.Models;
 using PersonalFinance.Domain.Services;
 using PersonalFinance.Infrastructure;
@@ -16,7 +17,7 @@ public class SaveCommand(SaveOptions options,
         string? oneDrivePath = Environment.GetEnvironmentVariable("OneDrive");
         if (oneDrivePath == null)
         {
-            Console.WriteLine("OneDrive environment variable is not set.");
+            Console.WriteLine("OneDrive environment variable is not found.");
             return 1;
         }
 
@@ -28,17 +29,73 @@ public class SaveCommand(SaveOptions options,
             return 1;
         }
 
-        string statementFilePath = Path.Combine(financesPath, "stmt-full.csv");
-        if (!File.Exists(statementFilePath))
+        string? userProfilePath = Environment.GetEnvironmentVariable("USERPROFILE");
+        if (userProfilePath == null)
         {
-            Console.WriteLine($"File {statementFilePath} not found");
+            Console.WriteLine($"USERPROFILE environment variable not found.");
+            return 1;
+        }
+        
+        string downloadsPath = Path.Combine(userProfilePath, "Downloads");
+        string downloadedStatementFilePath = Path.Combine(downloadsPath, "stmt.csv");
+        if (!File.Exists(downloadedStatementFilePath))
+        {
+            Console.WriteLine($"File {downloadedStatementFilePath} not found.");
             return 1;
         }
 
+        string date = ParseStatementDate(downloadedStatementFilePath);
+        string statementFilePath = Path.Combine(financesPath, $"bofa-stmt-{date}");
+        File.Copy(downloadedStatementFilePath, statementFilePath, true);
+        if (!File.Exists(statementFilePath))
+        {
+            Console.WriteLine($"File {statementFilePath} not found.");
+            return 1;
+        }
+
+        RemoveSummaryLines(statementFilePath, 6);
+        
         IParsedTransactionItem[] transactions = await statementParser.Parse(statementFilePath);
         await transactionCategorizer.CategorizeAsync(categoryModelTrainingDataFilePath, transactions);
         await statementService.SaveAsync(transactions, options);
+
+        if (File.Exists(downloadedStatementFilePath))
+        {
+            File.Delete(downloadedStatementFilePath);
+        }
+        
         return 0;
+    }
+    
+    private static string ParseStatementDate(string filePath)
+    {
+        string date = DateTime.UtcNow.ToShortDateString();
+        const string datePattern = @"\b\d{1,2}/\d{1,2}/\d{4}\b";
+        string[] lines = File.ReadAllLines(filePath);
+        foreach (var line in lines)
+        {
+            if (!line.Contains("Ending balance"))
+            {
+                continue;
+            }
+
+            Match match = Regex.Match(line, datePattern);
+            if (!match.Success)
+            {
+                continue;
+            }
+            
+            date = match.Value;
+            break;
+        }
+
+        return date.Replace('/', '-');
+    }
+    
+    private static void RemoveSummaryLines(string filePath, int linesToRemove)
+    {
+        string[] lines = File.ReadAllLines(filePath);
+        File.WriteAllLines(filePath, lines.Skip(linesToRemove).ToArray());
     }
     
 }
