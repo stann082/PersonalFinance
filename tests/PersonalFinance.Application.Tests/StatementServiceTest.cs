@@ -3,7 +3,7 @@ using PersonalFinance.Application.Services;
 using PersonalFinance.Domain.Models;
 using PersonalFinance.Domain.Services;
 
-namespace PersonalFinance.Infrastructure.Tests;
+namespace PersonalFinance.Application.Tests;
 
 public class BankStatementParserTest
 {
@@ -46,6 +46,7 @@ public class BankStatementParserTest
     public void TearDown()
     {
         _client.DropDatabase("financial_data_test");
+        _client.Dispose();
     }
 
     #region Mock Classes
