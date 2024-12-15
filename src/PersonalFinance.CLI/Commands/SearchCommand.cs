@@ -21,20 +21,27 @@ public class SearchCommand(SearchOptions options, IStatementService service)
     {
         IEnumerable<ITransaction> allTransactions = await service.GetAsync();
 
-        DateTime startDate;
-        DateTime stopDate;
-        if (string.IsNullOrEmpty(options.PayPeriod))
-        {
-            startDate = DateTime.TryParse(options.GetFilterValue("after"), out var beforeDate) ? beforeDate : DateTime.MinValue;
-            stopDate = DateTime.TryParse(options.GetFilterValue("before"), out var afterDate) ? afterDate : DateTime.MaxValue;
-        }
-        else
+        DateTime startDate = DateTime.MinValue;
+        DateTime stopDate = DateTime.MaxValue;
+        if (!string.IsNullOrEmpty(options.PayPeriod))
         {
             ITransaction[] allTransactionArray = allTransactions.ToArray();
             var payPeriodCalculator = new PayPeriodCalculator();
             (string? startDateId, string? endDateId) = payPeriodCalculator.Calculate(allTransactionArray, options.PayPeriod, PayPeriodDescription);
             startDate = allTransactionArray.FirstOrDefault(t => t.TransactionId == startDateId)?.Date ?? DateTime.MinValue;
             stopDate = allTransactionArray.FirstOrDefault(t => t.TransactionId == endDateId)?.Date ?? DateTime.MaxValue;
+        }
+
+        string? after = options.GetFilterValue("after");
+        if (!string.IsNullOrEmpty(after))
+        {
+            startDate = DateTime.TryParse(after, out var beforeDate) ? beforeDate : DateTime.MinValue;
+        }
+
+        string? before = options.GetFilterValue("before");
+        if (!string.IsNullOrEmpty(before))
+        {
+            stopDate = DateTime.TryParse(before, out var afterDate) ? afterDate : DateTime.MaxValue;
         }
         
         var periodTransactions = allTransactions.Where(t => t.Date >= startDate && t.Date <= stopDate).ToArray();
