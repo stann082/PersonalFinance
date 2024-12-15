@@ -53,7 +53,7 @@ public class SaveCommand(SaveOptions options,
             return 1;
         }
 
-        RemoveSummaryLines(statementFilePath, 6);
+        RemoveUnwantedLines(statementFilePath, 6);
         
         IParsedTransactionItem[] transactions = await statementParser.Parse(statementFilePath);
         await transactionCategorizer.CategorizeAsync(categoryModelTrainingDataFilePath, transactions);
@@ -92,10 +92,20 @@ public class SaveCommand(SaveOptions options,
         return date.Replace('/', '-');
     }
     
-    private static void RemoveSummaryLines(string filePath, int linesToRemove)
+    private static void RemoveUnwantedLines(string filePath, int linesToRemove)
     {
         string[] lines = File.ReadAllLines(filePath);
         File.WriteAllLines(filePath, lines.Skip(linesToRemove).ToArray());
+        
+        lines = File.ReadAllLines(filePath);
+        var filteredLines = lines.Where(line => 
+            !line.Contains("Beginning balance as of") && 
+            !line.Contains("Total credits") && 
+            !line.Contains("Total debits") && 
+            !line.Contains("Ending balance as of")
+        ).ToArray();
+
+        File.WriteAllLines(filePath, filteredLines);
     }
     
 }
