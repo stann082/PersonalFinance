@@ -20,8 +20,4 @@
     <ProjectReference Include="..\PersonalFinance.Infrastructure\PersonalFinance.Infrastructure.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <PackageReference Include="MongoDB.Driver" Version="3.1.0" />
-  </ItemGroup>
-
 </Project>

@@ -1,5 +1,6 @@
 ﻿using PersonalFinance.Domain.Models;
 using PersonalFinance.Domain.Services;
+using Serilog;
 
 namespace PersonalFinance.CLI.Commands;
 
@@ -9,6 +10,22 @@ public class RemoveCommand(IRemoveOptions options, IStatementService service)
     #region Public Methods
 
     public async Task<int> Execute()
+    {
+        if (options.DuplicateItems)
+        {
+            await RemoveDuplicates(options.ShowOnly);
+            return 0;
+        }
+        
+        await RemoveTransaction(options.Id);
+        return await Task.FromResult(0);
+    }
+
+    #endregion
+
+    #region Helper Methods
+
+    private async Task RemoveDuplicates(bool showOnly)
     {
         IEnumerable<ITransaction> allTransactions = await service.GetAsync();
         var duplicateTransactions = allTransactions
@@ -20,14 +37,34 @@ public class RemoveCommand(IRemoveOptions options, IStatementService service)
         foreach (var t in duplicateTransactions)
         {
             Console.WriteLine($"Amount: {t.Amount}, Date: {t.Date:yyyy-MM-dd}, Description: {t.Description}, Category: {t.Category}, Balance: {t.Balance}");
+            if (showOnly)
+            {
+                continue;
+            }
+            
+            Console.Write("Would you like to delete this transaction? (Y/N): ");
+            string? input = Console.ReadLine();
+            while (input == null || (!input.Equals("Y", StringComparison.OrdinalIgnoreCase) && !input.Equals("N", StringComparison.OrdinalIgnoreCase)))
+            {
+                Console.WriteLine("Invalid input. Please enter 'Y' or 'N'.");
+                input = Console.ReadLine();
+            }
+
+            if (!input.Equals("Y", StringComparison.OrdinalIgnoreCase))
+            {
+                continue;
+            }
+            
+            await RemoveTransaction(options.Id);
         }
-        return await Task.FromResult(0);
+    }
+
+    private async Task RemoveTransaction(string? id)
+    {
+        var deleteResult = await service.DeleteAsync(id);
+        Log.Information("Deleted {DeleteResult} transaction(s)", deleteResult.DeletedCount);
     }
 
     #endregion
 
-    #region Helper Methods
-
-    #endregion
-    
 }
