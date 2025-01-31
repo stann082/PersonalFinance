@@ -112,4 +112,5 @@ public class SearchCommand(SearchOptions options, IStatementService service)
     }
 
     #endregion
+    
 }

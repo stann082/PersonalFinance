@@ -38,5 +38,19 @@ public class BankStatementParserTest
         // post-conditions
         Assert.That(records, Is.Empty);
     }
+      
+    [Test]
+    public async Task NonBlueSkyTest_Parse_QuotesInsideDescription()
+    {
+        // setup
+        DirectoryInfo? rootDir = new DirectoryInfo(Directory.GetCurrentDirectory()).Parent?.Parent?.Parent;
+        string filePath = Path.Combine(rootDir!.FullName, "etc", "stmt-01-2025.csv");
+
+        // exercise
+        var records = await _statementParser.Parse(filePath);
+        
+        // post-conditions
+        Assert.That(records, Is.Empty);
+    }
     
 }

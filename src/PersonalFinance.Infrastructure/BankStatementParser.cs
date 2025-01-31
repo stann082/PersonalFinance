@@ -2,6 +2,7 @@
 using CsvHelper;
 using PersonalFinance.Domain.Models;
 using PersonalFinance.Infrastructure.Models;
+using Serilog;
 
 namespace PersonalFinance.Infrastructure;
 
@@ -26,15 +27,16 @@ public class BankStatementParser : IBankStatementParser
                 }
             }
         }
-        catch (Exception)
+        catch (Exception ex)
         {
-            // log error
+            Log.Error(ex, "Something went wrong");
             return await Task.FromResult(Array.Empty<IParsedTransactionItem>());
         }
         finally
         {
             reader?.Dispose();
             csv?.Dispose();
+            await Log.CloseAndFlushAsync();
         }
     }
 

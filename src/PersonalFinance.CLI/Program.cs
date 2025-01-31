@@ -3,6 +3,7 @@ using MongoDB.Driver;
 using PersonalFinance.Application.Services;
 using PersonalFinance.Domain.Services;
 using PersonalFinance.Infrastructure;
+using Serilog;
 
 namespace PersonalFinance.CLI;
 
@@ -13,6 +14,15 @@ public static class Program
 
     public static async Task<int> Main(string[] args)
     {
+        string baseLogPath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
+        string logFilePath = Path.Combine(baseLogPath, "logs", "personal-finance", "usage.log");
+
+        Log.Logger = new LoggerConfiguration()
+            .MinimumLevel.Debug()
+            .WriteTo.Console()
+            .WriteTo.File(logFilePath, shared: true, rollingInterval: RollingInterval.Day)
+            .CreateLogger();
+        
         var services = new ServiceCollection()
             .AddSingleton<App>()
             .AddSingleton<IMongoDatabase>(_ => new MongoClient("mongodb://localhost:27017")

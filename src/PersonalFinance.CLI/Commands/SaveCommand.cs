@@ -29,13 +29,7 @@ public class SaveCommand(SaveOptions options,
             return 1;
         }
 
-        string? userProfilePath = Environment.GetEnvironmentVariable("USERPROFILE");
-        if (userProfilePath == null)
-        {
-            Console.WriteLine($"USERPROFILE environment variable not found.");
-            return 1;
-        }
-        
+        string userProfilePath = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
         string downloadsPath = Path.Combine(userProfilePath, "Downloads");
         string downloadedStatementFilePath = Path.Combine(downloadsPath, "stmt.csv");
         if (!File.Exists(downloadedStatementFilePath))
@@ -45,7 +39,7 @@ public class SaveCommand(SaveOptions options,
         }
 
         string date = ParseStatementDate(downloadedStatementFilePath);
-        string statementFilePath = Path.Combine(financesPath, $"bofa-stmt-{date}");
+        string statementFilePath = Path.Combine(financesPath, $"bofa-stmt-{date}.csv");
         File.Copy(downloadedStatementFilePath, statementFilePath, true);
         if (!File.Exists(statementFilePath))
         {
