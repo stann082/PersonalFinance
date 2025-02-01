@@ -1,5 +1,6 @@
 ﻿using PersonalFinance.Domain.Models;
 using PersonalFinance.Domain.Services;
+using PersonalFinance.Domain.Util;
 using Serilog;
 
 namespace PersonalFinance.CLI.Commands;
@@ -42,20 +43,10 @@ public class RemoveCommand(IRemoveOptions options, IStatementService service)
                 continue;
             }
             
-            Console.Write("Would you like to delete this transaction? (Y/N): ");
-            string? input = Console.ReadLine();
-            while (input == null || (!input.Equals("Y", StringComparison.OrdinalIgnoreCase) && !input.Equals("N", StringComparison.OrdinalIgnoreCase)))
+            if (ConsoleHelper.ConfirmAction("Would you like to delete this transaction?"))
             {
-                Console.WriteLine("Invalid input. Please enter 'Y' or 'N'.");
-                input = Console.ReadLine();
+                await RemoveTransaction(options.Id);
             }
-
-            if (!input.Equals("Y", StringComparison.OrdinalIgnoreCase))
-            {
-                continue;
-            }
-            
-            await RemoveTransaction(options.Id);
         }
     }
 

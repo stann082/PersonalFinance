@@ -2,6 +2,7 @@
 using PersonalFinance.Application.Models;
 using PersonalFinance.Domain.Models;
 using PersonalFinance.Domain.Services;
+using PersonalFinance.Domain.Util;
 
 namespace PersonalFinance.Application.Services;
 
@@ -55,15 +56,7 @@ public class StatementService(IMongoDatabase database) : IStatementService
                     if (saveOptions.Review)
                     {
                         Console.WriteLine($"{existingTransaction}; Recurring status: {existingTransaction.IsRecurring}");
-                        Console.Write($"Would you like to update this transaction with {transaction.IsRecurring}? (Y/N): ");
-                        string? input = Console.ReadLine();
-                        while (input == null || (!input.Equals("Y", StringComparison.OrdinalIgnoreCase) && !input.Equals("N", StringComparison.OrdinalIgnoreCase)))
-                        {
-                            Console.WriteLine("Invalid input. Please enter 'Y' or 'N'.");
-                            input = Console.ReadLine();
-                        }
-
-                        if (input.Equals("Y", StringComparison.OrdinalIgnoreCase))
+                        if (ConsoleHelper.ConfirmAction($"Would you like to update this transaction with {transaction.IsRecurring}?"))
                         {
                             var update = Builders<Transaction>.Update.Set(u => u.IsRecurring, transaction.IsRecurring);
                             await transactionsCollection.UpdateOneAsync(filter, update);
