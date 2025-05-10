@@ -28,7 +28,7 @@ public class SearchOptions : ISearchOptions
 
     #region Public Methods
 
-    public string? GetFilterValue(string key)
+    public string GetFilterValue(string key)
     {
         if (FilterMap.Count == 0)
         {

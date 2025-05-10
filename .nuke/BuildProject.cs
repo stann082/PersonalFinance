@@ -77,7 +77,7 @@ class BuildProject : NukeBuild
         .Executes(() =>
         {
             DotNetTasks.DotNetPublish(s => s
-                .SetProject(RootDirectory / "PersonalFinance.sln")
+                .SetProject(RootDirectory / "src" / "PersonalFinance.CLI" / "PersonalFinance.CLI.csproj")
                 .SetConfiguration(Configuration.Release)
                 .SetVerbosity(DotNetVerbosityLevel)
                 .SetOutput(RootDirectory / "pub"));

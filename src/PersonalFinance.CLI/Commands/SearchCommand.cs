@@ -75,20 +75,20 @@ public class SearchCommand(SearchOptions options, IStatementService service)
     {
         var debits = periodTransactions.Where(t => t.Amount < 0).Select(t => Math.Abs(t.Amount)).Sum();
         var credits = periodTransactions.Where(t => t.Amount > 0).Select(t => t.Amount).Sum();
-        Console.WriteLine($"\n   Total debits: ${Math.Abs(debits):N2}");
-        Console.WriteLine($"  Total credits: ${credits:N2}");
-        Console.WriteLine($"    Net balance: ${credits - debits:N2}\n");
+        Console.WriteLine($"\n     Money spent: ${Math.Abs(debits):N2}");
+        Console.WriteLine($"  Money received: ${credits:N2}");
+        Console.WriteLine($"      Money left: ${credits - debits:N2}\n");
 
         var recurringDebits = filteredTransactions.Where(t => t is { IsRecurring: true })
             .Select(t => t.Amount).Sum();
-        if (recurringDebits != 0) Console.WriteLine($"       Recurring debits: ${Math.Abs(recurringDebits):N2}");
+        if (recurringDebits != 0) Console.WriteLine($"       Recurring expenses: ${Math.Abs(recurringDebits):N2}");
 
         var nonRecurringDebits = filteredTransactions.Where(t => t is { IsRecurring: false })
             .Select(t => t.Amount).Sum();
-        if (nonRecurringDebits != 0) Console.WriteLine($"   Non-recurring debits: ${Math.Abs(nonRecurringDebits):N2}");
+        if (nonRecurringDebits != 0) Console.WriteLine($"        One-time expenses: ${Math.Abs(nonRecurringDebits):N2}");
 
         Console.ForegroundColor = ConsoleColor.Red;
-        Console.WriteLine("\nCredits are in highlighted in red\n");
+        Console.WriteLine("\nMoney received highlighted in red\n");
         Console.ResetColor();
     }
 
