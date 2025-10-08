@@ -49,21 +49,50 @@ public class SearchCommand(SearchOptions options, IStatementService service)
         IEnumerable<ITransaction> filteredTransactions = periodTransactions;
         bool? isRecurring = bool.TryParse(options.GetFilterValue("recurring"), out var recurring) ? recurring : null;
         if (isRecurring.HasValue)
+        {
             filteredTransactions = filteredTransactions.Where(t => t.IsRecurring == isRecurring.Value).ToArray();
+        }
 
         var sortByAmount = options.GetFilterValue("amountSort");
-        if (sortByAmount == "desc")
-            filteredTransactions = filteredTransactions.OrderByDescending(t => t.Amount).ToArray();
+        filteredTransactions = sortByAmount switch
+        {
+            "desc" => filteredTransactions.OrderByDescending(t => t.Amount).ToArray(),
+            "asc" => filteredTransactions.OrderBy(t => t.Amount).ToArray(),
+            _ => filteredTransactions
+        };
 
         if (!string.IsNullOrEmpty(options.Query))
+        {
             filteredTransactions = filteredTransactions.Where(t =>
-                t.Description != null && t.Description.Contains(options.Query, StringComparison.OrdinalIgnoreCase));
+                t.Description != null && 
+                t.Description.Contains(options.Query, StringComparison.OrdinalIgnoreCase));
+        }
 
         var filteredArray = filteredTransactions.ToArray();
-        int? wrap = int.TryParse(options.GetFilterValue("wrap"), out var wrapLength) ? wrapLength : null;
-        FormatAndPrintTransactions(filteredArray, wrap);
-        DisplayTotals(periodTransactions, filteredArray);
-
+        if (options.Export)
+        {
+            string filePath = Path.Combine(Path.GetTempPath(), $"fin-{DateTime.Now:yyyyMMddHHmmss}.csv");
+            
+            List<string> fileContent = new List<string>();
+            fileContent.Add(options.ShowBalance ? "Date,Description,Amount,Category,Balance" : "Date,Description,Amount,Category");
+            foreach (ITransaction t in filteredArray)
+            {
+                t.Description = t.Description?.Replace(',', ' ');
+                fileContent.Add(options.ShowBalance
+                    ? $"{t.Date.ToShortDateString()},{t.Description},{Math.Abs(t.Amount)},{t.Category},{t.Balance}"
+                    : $"{t.Date.ToShortDateString()},{t.Description},{Math.Abs(t.Amount)},{t.Category}");
+            }
+            
+            await File.WriteAllLinesAsync(filePath, fileContent);
+            Console.WriteLine($"The transactions were exported to {filePath}");
+        }
+        else
+        {
+            int? wrap = int.TryParse(options.GetFilterValue("wrap"), out var wrapLength) ? wrapLength : null;
+            FormatAndPrintTransactions(filteredArray, wrap);
+            DisplayTotals(periodTransactions, filteredArray);
+        }
+        
         return await Task.FromResult(0);
     }
 

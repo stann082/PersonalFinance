@@ -65,7 +65,7 @@ public class PayPeriodCalculatorTest
         public decimal Balance => 0;
         public string? Category  => null;
         public DateTime Date { get; init; }
-        public string? Description { get; init; }
+        public string? Description { get; set; }
         public bool IsRecurring => false;
         public string? TransactionId { get; init; }
         public TransactionType TransactionType => TransactionType.Credit;

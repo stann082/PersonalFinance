@@ -9,7 +9,7 @@ public interface ITransaction
     decimal Balance { get; }
     string? Category { get; }
     DateTime Date { get; }
-    string? Description { get; }
+    string? Description { get; set; }
     bool IsRecurring { get; }
     string? TransactionId { get; }
     TransactionType TransactionType { get; }

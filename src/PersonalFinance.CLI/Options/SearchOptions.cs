@@ -9,6 +9,9 @@ public class SearchOptions : ISearchOptions
 
     #region Properties - Search Options
 
+    [Option('e', "export", HelpText = "Export results to file")]
+    public bool Export { get; set; } = false;
+
     [Option('f', "filter", HelpText = "Filters by amount, balance, date (e.g., -f \"after=2024-02-05&before=2024-04-07&balance=100\"")]
     public string Filter { get; set; } = string.Empty;
 
@@ -17,6 +20,9 @@ public class SearchOptions : ISearchOptions
 
     [Option("pay-period", HelpText = "Enter the pay period (e.g., \"September2024\"")]
     public string PayPeriod { get; set; } = string.Empty;
+
+    [Option("show-balance", HelpText = "Show balance column")]
+    public bool ShowBalance { get; set; } = false;
 
     #endregion
 
