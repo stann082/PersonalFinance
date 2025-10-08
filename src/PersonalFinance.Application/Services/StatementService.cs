@@ -2,13 +2,12 @@
 using PersonalFinance.Application.Models;
 using PersonalFinance.Domain.Models;
 using PersonalFinance.Domain.Services;
-using PersonalFinance.Domain.Util;
 
 namespace PersonalFinance.Application.Services;
 
 public class StatementService(IMongoDatabase database) : IStatementService
 {
-
+    
     #region Public Methods
 
     public async Task<ITransaction[]> GetAsync(ISearchOptions? searchOptions = null)
@@ -37,7 +36,7 @@ public class StatementService(IMongoDatabase database) : IStatementService
         int existingTransactions = 0;
         int updatedTransactions = 0;
 
-        var transactions = parsedItems.Select(i => new Transaction(i)).ToArray();
+        Transaction[] transactions = parsedItems.Select(i => new Transaction(i)).ToArray();
         foreach (Transaction transaction in transactions)
         {
             var filter = Builders<Transaction>.Filter.And(
@@ -53,30 +52,11 @@ public class StatementService(IMongoDatabase database) : IStatementService
                 string consoleMessage;
                 if (existingTransaction.IsRecurring != transaction.IsRecurring)
                 {
-                    if (saveOptions.Review)
-                    {
-                        Console.WriteLine($"{existingTransaction}; Recurring status: {existingTransaction.IsRecurring}");
-                        if (ConsoleHelper.ConfirmAction($"Would you like to update this transaction with {transaction.IsRecurring}?"))
-                        {
-                            var update = Builders<Transaction>.Update.Set(u => u.IsRecurring, transaction.IsRecurring);
-                            await transactionsCollection.UpdateOneAsync(filter, update);
+                    var update = Builders<Transaction>.Update.Set(u => u.IsRecurring, transaction.IsRecurring);
+                    await transactionsCollection.UpdateOneAsync(filter, update);
 
-                            consoleMessage = $"Updated recurring status for: {existingTransaction}";
-                            updatedTransactions++;
-                        }
-                        else
-                        {
-                            continue;
-                        }
-                    }
-                    else
-                    {
-                        var update = Builders<Transaction>.Update.Set(u => u.IsRecurring, transaction.IsRecurring);
-                        await transactionsCollection.UpdateOneAsync(filter, update);
-
-                        consoleMessage = $"Updated recurring status for: {existingTransaction}";
-                        updatedTransactions++;
-                    }
+                    consoleMessage = $"Updated recurring status for: {existingTransaction}";
+                    updatedTransactions++;
                 }
                 else
                 {
@@ -103,11 +83,11 @@ public class StatementService(IMongoDatabase database) : IStatementService
 
     #region Helper Methods
 
-    private IMongoCollection<Transaction> GetTransactionsCollection()
+    public IMongoCollection<Transaction> GetTransactionsCollection()
     {
         return database.GetCollection<Transaction>("transactions");
     }
 
     #endregion
-
+    
 }

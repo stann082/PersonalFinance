@@ -4,5 +4,5 @@ namespace PersonalFinance.Infrastructure;
 
 public interface ITransactionCategorizer
 {
-    Task CategorizeAsync(string modelTrainingFilePath, IEnumerable<IParsedTransactionItem> transactions);
+    Task CategorizeAsync(string modelTrainingFilePath, IEnumerable<ITrainingModelItem> transactions);
 }

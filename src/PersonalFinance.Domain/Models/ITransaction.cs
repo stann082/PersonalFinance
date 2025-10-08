@@ -2,15 +2,12 @@
 
 namespace PersonalFinance.Domain.Models;
 
-public interface ITransaction
+public interface ITransaction : ITrainingModelItem
 {
     
     decimal Amount { get; }
     decimal Balance { get; }
-    string? Category { get; }
     DateTime Date { get; }
-    string? Description { get; set; }
-    bool IsRecurring { get; }
     string? TransactionId { get; }
     TransactionType TransactionType { get; }
     
