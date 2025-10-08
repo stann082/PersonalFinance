@@ -63,10 +63,10 @@ public class PayPeriodCalculatorTest
     {
         public decimal Amount => 0;
         public decimal Balance => 0;
-        public string? Category  => null;
+        public string? Category { get; set; }
         public DateTime Date { get; init; }
         public string? Description { get; set; }
-        public bool IsRecurring => false;
+        public bool IsRecurring { get; set; }
         public string? TransactionId { get; init; }
         public TransactionType TransactionType => TransactionType.Credit;
     }

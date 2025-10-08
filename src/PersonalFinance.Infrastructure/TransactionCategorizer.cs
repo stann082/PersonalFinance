@@ -10,7 +10,7 @@ public class TransactionCategorizer : ITransactionCategorizer
 
     #region Public Methods
 
-    public async Task CategorizeAsync(string modelTrainingFilePath, IEnumerable<IParsedTransactionItem> transactions)
+    public async Task CategorizeAsync(string modelTrainingFilePath, IEnumerable<ITrainingModelItem> transactions)
     {
         var mlContext = new MLContext();
         var trainingDataView = mlContext.Data.LoadFromTextFile<TransactionCategorizerData>(modelTrainingFilePath,
@@ -41,7 +41,7 @@ public class TransactionCategorizer : ITransactionCategorizer
         Console.WriteLine("Use the model for predictions");
         var categoryPredictor = await Task.FromResult(mlContext.Model.CreatePredictionEngine<TransactionCategorizerData, CategoryPrediction>(categoryModel));
         var recurringPredictor = await Task.FromResult(mlContext.Model.CreatePredictionEngine<TransactionCategorizerData, RecurringPrediction>(recurringModel));
-        foreach (IParsedTransactionItem transaction in transactions)
+        foreach (ITrainingModelItem transaction in transactions)
         {
             var transactionData = new TransactionCategorizerData { Description = transaction.Description };
             var categoryPrediction = categoryPredictor.Predict(transactionData);

@@ -2,45 +2,27 @@
 using PersonalFinance.CLI.Options;
 using PersonalFinance.Domain.Models;
 using PersonalFinance.Domain.Services;
+using PersonalFinance.Domain.Util;
 using PersonalFinance.Infrastructure;
 
 namespace PersonalFinance.CLI.Commands;
 
-public class SaveCommand(SaveOptions options, 
-    IBankStatementParser statementParser,
-    IStatementService statementService,
-    ITransactionCategorizer transactionCategorizer)
+public class SaveCommand(SaveOptions options, IBankStatementParser statementParser, IStatementService statementService, ITransactionCategorizer transactionCategorizer)
 {
 
     public async Task<int> Execute()
     {
-        string? oneDrivePath = Environment.GetEnvironmentVariable("OneDrive");
-        if (oneDrivePath == null)
+        var pathProvider = new PathProvider();
+        var hasValidPaths = pathProvider.Validate();
+        if (!hasValidPaths.IsValid)
         {
-            Console.WriteLine("OneDrive environment variable is not found.");
+            Console.WriteLine(hasValidPaths.Error);
             return 1;
         }
-
-        string financesPath = Path.Combine(oneDrivePath, "Documents", "personal", "finances");
-        string categoryModelTrainingDataFilePath = Path.Combine(financesPath, "category-model-training-data.csv");
-        if (!File.Exists(categoryModelTrainingDataFilePath))
-        {
-            Console.WriteLine($"File {categoryModelTrainingDataFilePath} not found");
-            return 1;
-        }
-
-        string userProfilePath = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
-        string downloadsPath = Path.Combine(userProfilePath, "Downloads");
-        string downloadedStatementFilePath = Path.Combine(downloadsPath, "stmt.csv");
-        if (!File.Exists(downloadedStatementFilePath))
-        {
-            Console.WriteLine($"File {downloadedStatementFilePath} not found.");
-            return 1;
-        }
-
-        string date = ParseStatementDate(downloadedStatementFilePath);
-        string statementFilePath = Path.Combine(financesPath, $"bofa-stmt-{date}.csv");
-        File.Copy(downloadedStatementFilePath, statementFilePath, true);
+        
+        string date = ParseStatementDate(pathProvider.DownloadedStatementFilePath);
+        string statementFilePath = Path.Combine(pathProvider.FinancesPath, $"bofa-stmt-{date}.csv");
+        File.Copy(pathProvider.DownloadedStatementFilePath, statementFilePath, true);
         if (!File.Exists(statementFilePath))
         {
             Console.WriteLine($"File {statementFilePath} not found.");
@@ -50,12 +32,12 @@ public class SaveCommand(SaveOptions options,
         RemoveUnwantedLines(statementFilePath, 6);
         
         IParsedTransactionItem[] transactions = await statementParser.Parse(statementFilePath);
-        await transactionCategorizer.CategorizeAsync(categoryModelTrainingDataFilePath, transactions);
+        await transactionCategorizer.CategorizeAsync(pathProvider.CategoryModelTrainingDataFilePath, transactions);
         await statementService.SaveAsync(transactions, options);
 
-        if (File.Exists(downloadedStatementFilePath))
+        if (File.Exists(pathProvider.DownloadedStatementFilePath))
         {
-            File.Delete(downloadedStatementFilePath);
+            File.Delete(pathProvider.DownloadedStatementFilePath);
         }
         
         return 0;
