@@ -7,7 +7,7 @@ namespace PersonalFinance.Application.Services;
 
 public class StatementService(IMongoDatabase database) : IStatementService
 {
-
+    
     #region Public Methods
 
     public async Task<ITransaction[]> GetAsync(ISearchOptions? searchOptions = null)
@@ -52,11 +52,11 @@ public class StatementService(IMongoDatabase database) : IStatementService
                 string consoleMessage;
                 if (existingTransaction.IsRecurring != transaction.IsRecurring)
                 {
-                        var update = Builders<Transaction>.Update.Set(u => u.IsRecurring, transaction.IsRecurring);
-                        await transactionsCollection.UpdateOneAsync(filter, update);
+                    var update = Builders<Transaction>.Update.Set(u => u.IsRecurring, transaction.IsRecurring);
+                    await transactionsCollection.UpdateOneAsync(filter, update);
 
-                        consoleMessage = $"Updated recurring status for: {existingTransaction}";
-                        updatedTransactions++;
+                    consoleMessage = $"Updated recurring status for: {existingTransaction}";
+                    updatedTransactions++;
                 }
                 else
                 {
@@ -89,5 +89,5 @@ public class StatementService(IMongoDatabase database) : IStatementService
     }
 
     #endregion
-
+    
 }

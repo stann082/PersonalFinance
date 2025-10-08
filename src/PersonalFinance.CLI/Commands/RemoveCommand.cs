@@ -26,6 +26,19 @@ public class RemoveCommand(IRemoveOptions options, IStatementService service)
 
     #region Helper Methods
 
+    private static bool ConfirmAction(string message)
+    {
+        Console.Write($"{message} (Y/N): ");
+        string? input = Console.ReadLine();
+        while (input == null || (!input.Equals("Y", StringComparison.OrdinalIgnoreCase) && !input.Equals("N", StringComparison.OrdinalIgnoreCase)))
+        {
+            Console.WriteLine("Invalid input. Please enter 'Y' or 'N'.");
+            input = Console.ReadLine();
+        }
+        
+        return input.Equals("Y", StringComparison.OrdinalIgnoreCase);
+    }
+
     private async Task RemoveDuplicates(bool showOnly)
     {
         IEnumerable<ITransaction> allTransactions = await service.GetAsync();
@@ -43,7 +56,7 @@ public class RemoveCommand(IRemoveOptions options, IStatementService service)
                 continue;
             }
             
-            if (ConsoleHelper.ConfirmAction("Would you like to delete this transaction?"))
+            if (ConfirmAction("Would you like to delete this transaction?"))
             {
                 await RemoveTransaction(options.Id);
             }
