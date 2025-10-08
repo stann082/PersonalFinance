@@ -83,7 +83,7 @@ public class StatementService(IMongoDatabase database) : IStatementService
 
     #region Helper Methods
 
-    private IMongoCollection<Transaction> GetTransactionsCollection()
+    public IMongoCollection<Transaction> GetTransactionsCollection()
     {
         return database.GetCollection<Transaction>("transactions");
     }

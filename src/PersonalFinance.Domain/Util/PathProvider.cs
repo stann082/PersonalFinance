@@ -13,7 +13,7 @@ public class PathProvider
 
     #region Public Methods
 
-    public (string Error, bool IsValid) Validate()
+    public (string Error, bool IsValid) Validate(bool trainingFileOnly = false)
     {
         string? oneDrivePath = Environment.GetEnvironmentVariable("OneDrive");
         if (oneDrivePath == null)
@@ -31,6 +31,11 @@ public class PathProvider
         if (!File.Exists(CategoryModelTrainingDataFilePath))
         {
             return ($"File {CategoryModelTrainingDataFilePath} not found", false);
+        }
+
+        if (trainingFileOnly)
+        {
+            return (string.Empty, true);
         }
 
         string userProfilePath = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
