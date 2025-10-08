@@ -108,6 +108,7 @@ public class ReviewCommand(ReviewOptions options, IStatementService service, ITr
 
             Console.WriteLine();
             Console.WriteLine("Enter numbers to update (comma-separated),");
+            Console.WriteLine("or 'a' to update ALL on this page,");
             Console.WriteLine("or press Enter to skip page, 'n' next, 'p' prev, 'q' quit:");
             Console.Write("> ");
 
@@ -135,15 +136,22 @@ public class ReviewCommand(ReviewOptions options, IStatementService service, ITr
                 continue;
             }
 
-            // Parse comma-delimited selection
-            var indices = ParseSelection(input, pageItems.Count);
+            List<int> indices;
+            if (input.Equals("a", StringComparison.OrdinalIgnoreCase) || input.Equals("all", StringComparison.OrdinalIgnoreCase))
+            {
+                indices = Enumerable.Range(1, pageItems.Count).ToList();
+            }
+            else
+            {
+                indices = ParseSelection(input, pageItems.Count);
+            }
+
             if (indices.Count == 0)
             {
                 Console.WriteLine("No valid indices selected.");
                 continue;
             }
 
-            // Prepare bulk updates for selected items on this page
             var writes = new List<WriteModel<Transaction>>(indices.Count);
             writes.AddRange(from oneBased in indices
                 select pageItems[oneBased - 1]
@@ -151,12 +159,13 @@ public class ReviewCommand(ReviewOptions options, IStatementService service, ITr
                 let idFilter = Builders<Transaction>.Filter.Eq(x => x.Id, item.Existing?.Id)
                 let update = Builders<Transaction>.Update.Set(x => x.IsRecurring, item.DesiredIsRecurring)
                 select new UpdateOneModel<Transaction>(idFilter, update));
-
-            if (writes.Count > 0)
+            if (writes.Count <= 0)
             {
-                var result = await collection.BulkWriteAsync(writes);
-                Console.WriteLine($"Updated {result.ModifiedCount} item(s).");
+                continue;
             }
+
+            var result = await collection.BulkWriteAsync(writes);
+            Console.WriteLine($"Updated {result.ModifiedCount} item(s).");
         }
 
         static List<int> ParseSelection(string input, int max)
@@ -180,7 +189,7 @@ public class ReviewCommand(ReviewOptions options, IStatementService service, ITr
                 return string.Empty;
             }
 
-            return s.Length <= max ? s : s.Substring(0, max - 1) + "…";
+            return s.Length <= max ? s : string.Concat(s.AsSpan(0, max - 1), "…");
         }
     }
 
