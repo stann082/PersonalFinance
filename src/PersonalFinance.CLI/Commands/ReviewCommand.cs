@@ -84,33 +84,24 @@ public class ReviewCommand(ReviewOptions options, IStatementService service, ITr
         const int pageSize = 10;
         int page = 0;
 
+        int pageTop = Console.CursorTop;
+        const int blockHeight = 5 + pageSize + 5;
+
         while (true)
         {
             var pageItems = pending.Skip(page * pageSize).Take(pageSize).ToList();
             if (pageItems.Count == 0)
             {
+                Console.SetCursorPosition(0, pageTop);
+                ClearBlock(pageTop, blockHeight);
                 Console.WriteLine("No more items.");
                 return;
             }
 
-            Console.WriteLine();
-            Console.WriteLine($"Showing {page * pageSize + 1}-{page * pageSize + pageItems.Count} of {pending.Count}");
-            Console.WriteLine("Idx | Date        | Amount     | IsRecurring (current → desired) | Description");
-            Console.WriteLine("----+-------------+------------+---------------------------------+------------");
-
-            for (int i = 0; i < pageItems.Count; i++)
-            {
-                var idx = i + 1;
-                var it = pageItems[i];
-                Console.WriteLine(
-                    $"{idx,3} | {it.Existing?.Date:yyyy-MM-dd} | {it.Existing?.Amount,10:0.00} | {it.Existing?.IsRecurring,5} → {it.DesiredIsRecurring,5}        | {Trunc(it.Existing?.Description, 60)}");
-            }
-
-            Console.WriteLine();
-            Console.WriteLine("Enter numbers to update (comma-separated),");
-            Console.WriteLine("or 'a' to update ALL on this page,");
-            Console.WriteLine("or press Enter to skip page, 'n' next, 'p' prev, 'q' quit:");
-            Console.Write("> ");
+            Console.SetCursorPosition(0, pageTop);
+            ClearBlock(pageTop, blockHeight);
+            DrawPage(page, pageSize, pending.Count, pageItems);
+            WritePromptInline("Enter numbers (comma), 'a' for ALL on page, Enter=skip, n=next, p=prev, q=quit: ");
 
             var input = Console.ReadLine()?.Trim();
             if (string.IsNullOrEmpty(input))
@@ -139,9 +130,11 @@ public class ReviewCommand(ReviewOptions options, IStatementService service, ITr
             List<int> indices = input.Equals("a", StringComparison.OrdinalIgnoreCase) || input.Equals("all", StringComparison.OrdinalIgnoreCase)
                 ? Enumerable.Range(1, pageItems.Count).ToList()
                 : ParseSelection(input, pageItems.Count);
+
             if (indices.Count == 0)
             {
-                Console.WriteLine("No valid indices selected.");
+                WritePromptInline("No valid indices. Press Enter to continue...");
+                Console.ReadLine();
                 continue;
             }
 
@@ -152,14 +145,54 @@ public class ReviewCommand(ReviewOptions options, IStatementService service, ITr
                 let idFilter = Builders<Transaction>.Filter.Eq(x => x.Id, item.Existing?.Id)
                 let update = Builders<Transaction>.Update.Set(x => x.IsRecurring, item.DesiredIsRecurring)
                 select new UpdateOneModel<Transaction>(idFilter, update));
-            if (itemsToUpdate.Count <= 0)
+            if (itemsToUpdate.Count == 0)
             {
                 continue;
             }
 
             var result = await collection.BulkWriteAsync(itemsToUpdate);
-            Console.WriteLine($"Updated {result.ModifiedCount} item(s).");
+            WritePromptInline($"Updated {result.ModifiedCount} item(s). Press Enter to continue...");
+            Console.ReadLine();
             page++;
+        }
+
+        static void DrawPage(int page, int pageSize, int total, List<PendingUpdate> pageItems)
+        {
+            Console.WriteLine($"Showing {page * pageSize + 1}-{page * pageSize + pageItems.Count} of {total}");
+            Console.WriteLine("Idx | Date        | Amount     | IsRecurring (current → desired) | Description");
+            Console.WriteLine("----+-------------+------------+---------------------------------+------------");
+
+            for (int i = 0; i < pageItems.Count; i++)
+            {
+                var idx = i + 1;
+                var it = pageItems[i];
+                Console.WriteLine(
+                    $"{idx,3} | {it.Existing?.Date:yyyy-MM-dd} | {it.Existing?.Amount,10:0.00} | {it.Existing?.IsRecurring,5} → {it.DesiredIsRecurring,5}        | {Trunc(it.Existing?.Description, 60)}");
+            }
+
+            Console.WriteLine();
+            Console.WriteLine("Commands: numbers (e.g. 1,3,5), 'a' (all on page), Enter (skip), n (next), p (prev), q (quit)");
+        }
+
+        static void ClearBlock(int top, int height)
+        {
+            string blank = new string(' ', Math.Max(0, Console.BufferWidth - 1));
+            for (int i = 0; i < height; i++)
+            {
+                Console.SetCursorPosition(0, top + i);
+                Console.Write(blank);
+            }
+
+            Console.SetCursorPosition(0, top);
+        }
+
+        static void WritePromptInline(string text)
+        {
+            Console.Write("\r");
+            string blank = new string(' ', Math.Max(0, Console.BufferWidth - 1));
+            Console.Write(blank);
+            Console.Write("\r");
+            Console.Write(text);
         }
 
         static List<int> ParseSelection(string input, int max)
@@ -182,7 +215,7 @@ public class ReviewCommand(ReviewOptions options, IStatementService service, ITr
             {
                 return string.Empty;
             }
-
+            
             return s.Length <= max ? s : string.Concat(s.AsSpan(0, max - 1), "…");
         }
     }
