@@ -24,6 +24,14 @@ public class ReviewCommand(ReviewOptions options, IStatementService service, ITr
         }
 
         IEnumerable<ITransaction> allTransactions = await service.GetAsync();
+
+        if (!string.IsNullOrEmpty(options.Query))
+        {
+            allTransactions = allTransactions.Where(t =>
+                t.Description != null && 
+                t.Description.Contains(options.Query, StringComparison.OrdinalIgnoreCase));
+        }
+        
         DateTime startDate = DateTime.MinValue;
         if (!string.IsNullOrEmpty(options.StartDate))
         {
