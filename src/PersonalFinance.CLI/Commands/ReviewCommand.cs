@@ -136,36 +136,30 @@ public class ReviewCommand(ReviewOptions options, IStatementService service, ITr
                 continue;
             }
 
-            List<int> indices;
-            if (input.Equals("a", StringComparison.OrdinalIgnoreCase) || input.Equals("all", StringComparison.OrdinalIgnoreCase))
-            {
-                indices = Enumerable.Range(1, pageItems.Count).ToList();
-            }
-            else
-            {
-                indices = ParseSelection(input, pageItems.Count);
-            }
-
+            List<int> indices = input.Equals("a", StringComparison.OrdinalIgnoreCase) || input.Equals("all", StringComparison.OrdinalIgnoreCase)
+                ? Enumerable.Range(1, pageItems.Count).ToList()
+                : ParseSelection(input, pageItems.Count);
             if (indices.Count == 0)
             {
                 Console.WriteLine("No valid indices selected.");
                 continue;
             }
 
-            var writes = new List<WriteModel<Transaction>>(indices.Count);
-            writes.AddRange(from oneBased in indices
+            List<WriteModel<Transaction>> itemsToUpdate = new List<WriteModel<Transaction>>(indices.Count);
+            itemsToUpdate.AddRange(from oneBased in indices
                 select pageItems[oneBased - 1]
                 into item
                 let idFilter = Builders<Transaction>.Filter.Eq(x => x.Id, item.Existing?.Id)
                 let update = Builders<Transaction>.Update.Set(x => x.IsRecurring, item.DesiredIsRecurring)
                 select new UpdateOneModel<Transaction>(idFilter, update));
-            if (writes.Count <= 0)
+            if (itemsToUpdate.Count <= 0)
             {
                 continue;
             }
 
-            var result = await collection.BulkWriteAsync(writes);
+            var result = await collection.BulkWriteAsync(itemsToUpdate);
             Console.WriteLine($"Updated {result.ModifiedCount} item(s).");
+            page++;
         }
 
         static List<int> ParseSelection(string input, int max)

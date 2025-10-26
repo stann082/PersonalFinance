@@ -8,5 +8,9 @@ public class ReviewOptions
     
     [Option("start-date", HelpText = "Specify the start date (e.g., 2025-09-25)")]
     public string StartDate { get; set; } = string.Empty;
+    
+    [Option('q', "query", HelpText = "Search for a specific item.")]
+    public string Query { get; set; } = string.Empty;
+
 
 }
