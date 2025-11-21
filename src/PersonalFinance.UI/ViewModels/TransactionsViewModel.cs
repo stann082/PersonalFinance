@@ -17,7 +17,7 @@ public partial class TransactionsViewModel : ObservableObject
     {
         _statementService = statementService;
         LoadTransactionsCommand = new AsyncRelayCommand(LoadTransactionsAsync);
-        OpenTransactionCommand = new AsyncRelayCommand<ITransaction?>(OpenTransactionAsync);
+        OpenTransactionCommand = new AsyncRelayCommand<Transaction?>(OpenTransactionAsync);
         InitializeDateFilter();
         _ = LoadTransactionsAsync();
     }
@@ -27,10 +27,10 @@ public partial class TransactionsViewModel : ObservableObject
     #region Properties
 
     public IAsyncRelayCommand LoadTransactionsCommand { get; }
-    public IAsyncRelayCommand<ITransaction?> OpenTransactionCommand { get; }
+    public IAsyncRelayCommand<Transaction?> OpenTransactionCommand { get; }
 
     [ObservableProperty]
-    private ObservableCollection<ITransaction> _transactions = new();
+    private ObservableCollection<Transaction> _transactions = new();
     
     [ObservableProperty]
     private DateTime _startDate;
@@ -52,7 +52,7 @@ public partial class TransactionsViewModel : ObservableObject
     {
         try
         {
-            ITransaction[] transactions = await GetTransactionsAsync();
+            Transaction[] transactions = await GetTransactionsAsync();
             Transactions.Clear();
             foreach (var transaction in transactions.OrderByDescending(t => t.Date))
             {
@@ -65,7 +65,7 @@ public partial class TransactionsViewModel : ObservableObject
         }
     }
 
-    private async Task OpenTransactionAsync(ITransaction? transaction)
+    private async Task OpenTransactionAsync(Transaction? transaction)
     {
         if (transaction is null)
         {
@@ -89,7 +89,7 @@ public partial class TransactionsViewModel : ObservableObject
         StopDate = today;
     }
 
-    private async Task<ITransaction[]> GetTransactionsAsync()
+    private async Task<Transaction[]> GetTransactionsAsync()
     {
         UiOptions options = new UiOptions
         {

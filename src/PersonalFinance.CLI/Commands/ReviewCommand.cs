@@ -1,5 +1,4 @@
 using MongoDB.Driver;
-using PersonalFinance.Application.Models;
 using PersonalFinance.Application.Services;
 using PersonalFinance.CLI.Options;
 using PersonalFinance.Domain.Models;
@@ -23,7 +22,7 @@ public class ReviewCommand(ReviewOptions options, IStatementService service, ITr
             return 1;
         }
 
-        IEnumerable<ITransaction> allTransactions = await service.GetAsync();
+        IEnumerable<Transaction> allTransactions = await service.GetAsync();
 
         if (!string.IsNullOrEmpty(options.Query))
         {
@@ -38,7 +37,7 @@ public class ReviewCommand(ReviewOptions options, IStatementService service, ITr
             startDate = DateTime.TryParse(options.StartDate, out var beforeDate) ? beforeDate : DateTime.MinValue;
         }
 
-        ITransaction[] filteredTransactions = allTransactions.Where(t => t.Date >= startDate).ToArray();
+        Transaction[] filteredTransactions = allTransactions.Where(t => t.Date >= startDate).ToArray();
         await transactionCategorizer.CategorizeAsync(pathProvider.CategoryModelTrainingDataFilePath, filteredTransactions);
 
         var pending = new List<PendingUpdate>();
@@ -50,7 +49,7 @@ public class ReviewCommand(ReviewOptions options, IStatementService service, ITr
             return 1;
         }
 
-        foreach (ITransaction transaction in filteredTransactions)
+        foreach (Transaction transaction in filteredTransactions)
         {
             var filter = Builders<Transaction>.Filter.And(
                 Builders<Transaction>.Filter.Eq(f => f.Description, transaction.Description),

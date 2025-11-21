@@ -1,13 +1,17 @@
 ﻿using MongoDB.Bson;
 using PersonalFinance.Domain.Misc;
-using PersonalFinance.Domain.Models;
 
-namespace PersonalFinance.Application.Models;
+namespace PersonalFinance.Domain.Models;
 
-public class Transaction : ITransaction
+public class Transaction : ITrainingModelItem
 {
 
     #region Constructors
+
+    public Transaction()
+    {
+        // for unit tests
+    }
 
     public Transaction(IParsedTransactionItem item)
     {
@@ -22,11 +26,11 @@ public class Transaction : ITransaction
     public decimal Amount { get; private set; }
     public decimal Balance { get; private set; }
     public string? Category { get; set; }
-    public DateTime Date { get; private set; }
+    public DateTime Date { get; set; }
     public string? Description { get; set; }
     public bool IsDeposit => TransactionType == TransactionType.Credit;
     public bool IsRecurring { get; set; }
-    public string? TransactionId { get; private set; }
+    public string? TransactionId { get; set; }
     public TransactionType TransactionType { get; private set; }
 
     #endregion

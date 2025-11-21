@@ -1,5 +1,4 @@
 ﻿using MongoDB.Driver;
-using PersonalFinance.Application.Models;
 using PersonalFinance.Domain.Models;
 using PersonalFinance.Domain.Services;
 
@@ -10,7 +9,7 @@ public class StatementService(IMongoDatabase database) : IStatementService
     
     #region Public Methods
 
-    public async Task<ITransaction[]> GetAsync(ISearchOptions? options = null)
+    public async Task<Transaction[]> GetAsync(ISearchOptions? options = null)
     {
         var collection = GetTransactionsCollection();
         var b = Builders<Transaction>.Filter;
@@ -33,7 +32,7 @@ public class StatementService(IMongoDatabase database) : IStatementService
             .SortBy(t => t.Date)
             .ToListAsync();
 
-        return result.Cast<ITransaction>().ToArray();
+        return result.Cast<Transaction>().ToArray();
     }
 
     public async Task<DeleteResult> DeleteAsync(string? id)

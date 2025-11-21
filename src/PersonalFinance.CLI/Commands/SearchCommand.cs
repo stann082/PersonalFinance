@@ -13,13 +13,13 @@ public class SearchCommand(SearchOptions options, IStatementService service)
 
     public async Task<int> Execute()
     {
-        IEnumerable<ITransaction> allTransactions = await service.GetAsync();
+        IEnumerable<Transaction> allTransactions = await service.GetAsync();
 
         DateTime startDate = DateTime.MinValue;
         DateTime stopDate = DateTime.MaxValue;
         if (!string.IsNullOrEmpty(options.PayPeriod))
         {
-            ITransaction[] allTransactionArray = allTransactions.ToArray();
+            Transaction[] allTransactionArray = allTransactions.ToArray();
             var payPeriodCalculator = new PayPeriodCalculator();
             (string? startDateId, string? endDateId) = payPeriodCalculator.Calculate(allTransactionArray, options.PayPeriod, Constants.PayPeriodDescription);
             startDate = allTransactionArray.FirstOrDefault(t => t.TransactionId == startDateId)?.Date ?? DateTime.MinValue;
@@ -40,7 +40,7 @@ public class SearchCommand(SearchOptions options, IStatementService service)
         
         var periodTransactions = allTransactions.Where(t => t.Date >= startDate && t.Date <= stopDate).ToArray();
 
-        IEnumerable<ITransaction> filteredTransactions = periodTransactions;
+        IEnumerable<Transaction> filteredTransactions = periodTransactions;
         bool? isRecurring = bool.TryParse(options.GetFilterValue("recurring"), out var recurring) ? recurring : null;
         if (isRecurring.HasValue)
         {
@@ -68,7 +68,7 @@ public class SearchCommand(SearchOptions options, IStatementService service)
             string filePath = Path.Combine(Path.GetTempPath(), $"fin-{DateTime.Now:yyyyMMddHHmmss}.csv");
             
             List<string> fileContent = [ options.ShowBalance ? "Date,Description,Amount,Category,Balance" : "Date,Description,Amount,Category" ];
-            foreach (ITransaction t in filteredArray)
+            foreach (Transaction t in filteredArray)
             {
                 t.Description = t.Description?.Replace(',', ' ');
                 fileContent.Add(options.ShowBalance
@@ -93,7 +93,7 @@ public class SearchCommand(SearchOptions options, IStatementService service)
 
     #region Helper Methods
 
-    private static void DisplayTotals(ITransaction[] periodTransactions, ITransaction[] filteredTransactions)
+    private static void DisplayTotals(Transaction[] periodTransactions, Transaction[] filteredTransactions)
     {
         var debits = periodTransactions.Where(t => t.Amount < 0).Select(t => Math.Abs(t.Amount)).Sum();
         var credits = periodTransactions.Where(t => t.Amount > 0).Select(t => t.Amount).Sum();
@@ -114,7 +114,7 @@ public class SearchCommand(SearchOptions options, IStatementService service)
         Console.ResetColor();
     }
 
-    private static void FormatAndPrintTransactions(ITransaction[] transactions, int? wrapLength)
+    private static void FormatAndPrintTransactions(Transaction[] transactions, int? wrapLength)
     {
         var length = wrapLength ?? 500;
         var limitTo = length - 3;

@@ -8,7 +8,7 @@ public class PayPeriodCalculator
 
     #region Public Methods
 
-    public (string? startDateId, string? endDateId) Calculate(ITransaction[] transactions, string payPeriod, string description)
+    public (string? startDateId, string? endDateId) Calculate(Transaction[] transactions, string payPeriod, string description)
     {
         if (!DateTime.TryParseExact(payPeriod, "MMMMyyyy", CultureInfo.InvariantCulture, DateTimeStyles.None, out var periodDate))
         {

@@ -41,7 +41,7 @@ public class RemoveCommand(IRemoveOptions options, IStatementService service)
 
     private async Task RemoveDuplicates(bool showOnly)
     {
-        IEnumerable<ITransaction> allTransactions = await service.GetAsync();
+        IEnumerable<Transaction> allTransactions = await service.GetAsync();
         var duplicateTransactions = allTransactions
             .GroupBy(t => new { t.Amount, t.Date, t.Description, t.Balance })
             .Where(g => g.Count() > 1)

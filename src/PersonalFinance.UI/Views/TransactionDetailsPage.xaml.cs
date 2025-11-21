@@ -16,9 +16,9 @@ public partial class TransactionDetailsPage
 
     #region Properties
 
-    public ITransaction? Transaction
+    public Transaction? Transaction
     {
-        get => BindingContext as ITransaction;
+        get => BindingContext as Transaction;
         set => BindingContext = value;
     }
 
