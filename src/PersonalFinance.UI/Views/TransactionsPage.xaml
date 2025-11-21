@@ -27,14 +27,21 @@
 
             <CollectionView
                 Grid.Row="1"
-                x:Name="TransactionsList"
                 ItemsSource="{Binding Transactions}"
                 SelectionMode="None">
 
                 <CollectionView.ItemTemplate>
                     <DataTemplate>
                         <Grid Padding="8">
-                            <Label Text="{Binding .}" />
+                            <Label Text="{Binding .}">
+                                <Label.Triggers>
+                                    <DataTrigger TargetType="Label"
+                                                 Binding="{Binding IsDeposit}"
+                                                 Value="True">
+                                        <Setter Property="TextColor" Value="Red" />
+                                    </DataTrigger>
+                                </Label.Triggers>
+                            </Label>
                         </Grid>
                     </DataTemplate>
                 </CollectionView.ItemTemplate>

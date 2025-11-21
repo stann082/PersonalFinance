@@ -24,6 +24,7 @@ public class Transaction : ITransaction
     public string? Category { get; set; }
     public DateTime Date { get; private set; }
     public string? Description { get; set; }
+    public bool IsDeposit => TransactionType == TransactionType.Credit;
     public bool IsRecurring { get; set; }
     public string? TransactionId { get; private set; }
     public TransactionType TransactionType { get; private set; }
