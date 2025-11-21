@@ -17,6 +17,7 @@ public partial class TransactionsViewModel : ObservableObject
         _statementService = statementService;
         LoadTransactionsCommand = new AsyncRelayCommand(LoadTransactionsAsync);
         OpenTransactionCommand = new AsyncRelayCommand<ITransaction?>(OpenTransactionAsync);
+        InitializeDateFilter();
         _ = LoadTransactionsAsync();
     }
 
@@ -50,7 +51,6 @@ public partial class TransactionsViewModel : ObservableObject
     {
         try
         {
-            InitializeDateFilter();
             ITransaction[] transactions = await GetTransactionsAsync();
             Transactions.Clear();
             foreach (var transaction in transactions.OrderByDescending(t => t.Date))
