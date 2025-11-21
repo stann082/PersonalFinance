@@ -3,12 +3,7 @@
     x:Class="PersonalFinance.UI.Views.TransactionsPage"
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-    xmlns:viewmodels="clr-namespace:PersonalFinance.UI.ViewModels"
     Title="Transactions">
-
-    <ContentPage.BindingContext>
-        <viewmodels:TransactionModel />
-    </ContentPage.BindingContext>
 
     <ContentPage.Content>
         <Grid RowDefinitions="Auto,*"

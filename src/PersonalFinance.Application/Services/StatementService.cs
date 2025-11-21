@@ -10,15 +10,30 @@ public class StatementService(IMongoDatabase database) : IStatementService
     
     #region Public Methods
 
-    public async Task<ITransaction[]> GetAsync(ISearchOptions? searchOptions = null)
+    public async Task<ITransaction[]> GetAsync(ISearchOptions? options = null)
     {
-        IEnumerable<ITransaction> transactions = GetTransactionsCollection().AsQueryable().ToArray<ITransaction>();
-        if (searchOptions == null)
+        var collection = GetTransactionsCollection();
+        var b = Builders<Transaction>.Filter;
+
+        var filters = new List<FilterDefinition<Transaction>>();
+
+        if (options?.StartDate is { } start)
         {
-            return transactions.ToArray();
+            filters.Add(b.Gte(t => t.Date, start));
         }
 
-        return await Task.FromResult(transactions.ToArray());
+        if (options?.StopDate is { } stop)
+        {
+            filters.Add(b.Lte(t => t.Date, stop));
+        }
+
+        var finalFilter = filters.Count > 0 ? b.And(filters) : FilterDefinition<Transaction>.Empty;
+        var result = await collection
+            .Find(finalFilter)
+            .SortBy(t => t.Date)
+            .ToListAsync();
+
+        return result.Cast<ITransaction>().ToArray();
     }
 
     public async Task<DeleteResult> DeleteAsync(string? id)

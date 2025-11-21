@@ -1,4 +1,9 @@
 ﻿using Microsoft.Extensions.Logging;
+using MongoDB.Driver;
+using PersonalFinance.Application.Services;
+using PersonalFinance.Domain.Services;
+using PersonalFinance.UI.ViewModels;
+using PersonalFinance.UI.Views;
 
 namespace PersonalFinance.UI;
 
@@ -19,6 +24,10 @@ public static class MauiProgram
         builder.Logging.AddDebug();
 #endif
 
+        builder.Services.AddScoped<IStatementService, StatementService>();
+        builder.Services.AddSingleton<IMongoDatabase>(_ => new MongoClient("mongodb://localhost:27017").GetDatabase("financial_data"));
+        builder.Services.AddTransient<TransactionsViewModel>();
+        builder.Services.AddTransient<TransactionsPage>();
         return builder.Build();
     }
 }

@@ -9,12 +9,6 @@ namespace PersonalFinance.CLI.Commands;
 public class SearchCommand(SearchOptions options, IStatementService service)
 {
 
-    #region Constants
-
-    private const string PayPeriodDescription = "TIMECLOCK PLUS L DES:";
-
-    #endregion
-    
     #region Public Methods
 
     public async Task<int> Execute()
@@ -27,7 +21,7 @@ public class SearchCommand(SearchOptions options, IStatementService service)
         {
             ITransaction[] allTransactionArray = allTransactions.ToArray();
             var payPeriodCalculator = new PayPeriodCalculator();
-            (string? startDateId, string? endDateId) = payPeriodCalculator.Calculate(allTransactionArray, options.PayPeriod, PayPeriodDescription);
+            (string? startDateId, string? endDateId) = payPeriodCalculator.Calculate(allTransactionArray, options.PayPeriod, Constants.PayPeriodDescription);
             startDate = allTransactionArray.FirstOrDefault(t => t.TransactionId == startDateId)?.Date ?? DateTime.MinValue;
             stopDate = allTransactionArray.FirstOrDefault(t => t.TransactionId == endDateId)?.Date ?? DateTime.MaxValue;
         }

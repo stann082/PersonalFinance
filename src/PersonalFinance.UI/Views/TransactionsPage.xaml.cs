@@ -1,16 +1,12 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using PersonalFinance.UI.ViewModels;
 
 namespace PersonalFinance.UI.Views;
 
-public partial class TransactionsPage : ContentPage
+public partial class TransactionsPage
 {
-    public TransactionsPage()
+    public TransactionsPage(TransactionsViewModel viewModel)
     {
         InitializeComponent();
+        BindingContext = viewModel;
     }
 }
-
