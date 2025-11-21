@@ -3,7 +3,6 @@ using PersonalFinance.Domain.Models;
 
 namespace PersonalFinance.UI.Views;
 
-[QueryProperty(nameof(ITransaction), "Transaction")]
 public partial class TransactionDetailsPage
 {
     #region Constructors

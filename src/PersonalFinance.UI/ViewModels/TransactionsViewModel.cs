@@ -10,6 +10,7 @@ namespace PersonalFinance.UI.ViewModels;
 
 public partial class TransactionsViewModel : ObservableObject
 {
+    
     #region Constructors
 
     public TransactionsViewModel(IStatementService statementService)
@@ -111,4 +112,5 @@ public partial class TransactionsViewModel : ObservableObject
     }
     
     #endregion
+    
 }
