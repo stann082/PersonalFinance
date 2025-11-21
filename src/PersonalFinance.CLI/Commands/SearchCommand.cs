@@ -11,7 +11,7 @@ public class SearchCommand(SearchOptions options, IStatementService service)
 
     #region Constants
 
-    private const string PayPeriodDescription = "TIMECLOCK PLUS L DES:DIRECT DEP";
+    private const string PayPeriodDescription = "TIMECLOCK PLUS L DES:";
 
     #endregion
     
