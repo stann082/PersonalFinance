@@ -23,6 +23,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PersonalFinance.Infrastruct
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PersonalFinance.IntegrationTests", "tests\PersonalFinance.IntegrationTests\PersonalFinance.IntegrationTests.csproj", "{9F45A84D-B571-4D66-97DD-F2E252CE7DBE}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PersonalFinance.UI", "src\PersonalFinance.UI\PersonalFinance.UI.csproj", "{F76F0850-8875-4252-8755-95D92C83018A}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -64,6 +66,10 @@ Global
 		{9F45A84D-B571-4D66-97DD-F2E252CE7DBE}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{9F45A84D-B571-4D66-97DD-F2E252CE7DBE}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{9F45A84D-B571-4D66-97DD-F2E252CE7DBE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F76F0850-8875-4252-8755-95D92C83018A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F76F0850-8875-4252-8755-95D92C83018A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F76F0850-8875-4252-8755-95D92C83018A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F76F0850-8875-4252-8755-95D92C83018A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{7BCA208C-8FD8-432D-8E7F-187788A74C95} = {F3A591E9-5AF2-4B51-9A98-D53515E3531C}
@@ -74,5 +80,6 @@ Global
 		{C26929FF-EAC7-431E-B1B7-0B40D2902257} = {89A686A0-3274-4964-B20B-EFA9366175F7}
 		{6A2A3D22-1189-471C-A1E7-42D90E4E599E} = {89A686A0-3274-4964-B20B-EFA9366175F7}
 		{9F45A84D-B571-4D66-97DD-F2E252CE7DBE} = {89A686A0-3274-4964-B20B-EFA9366175F7}
+		{F76F0850-8875-4252-8755-95D92C83018A} = {F3A591E9-5AF2-4B51-9A98-D53515E3531C}
 	EndGlobalSection
 EndGlobal

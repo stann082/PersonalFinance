@@ -32,13 +32,13 @@ public class SearchCommand(SearchOptions options, IStatementService service)
             stopDate = allTransactionArray.FirstOrDefault(t => t.TransactionId == endDateId)?.Date ?? DateTime.MaxValue;
         }
 
-        string? after = options.GetFilterValue("after");
+        string after = options.GetFilterValue("after");
         if (!string.IsNullOrEmpty(after))
         {
             startDate = DateTime.TryParse(after, out var beforeDate) ? beforeDate : DateTime.MinValue;
         }
 
-        string? before = options.GetFilterValue("before");
+        string before = options.GetFilterValue("before");
         if (!string.IsNullOrEmpty(before))
         {
             stopDate = DateTime.TryParse(before, out var afterDate) ? afterDate : DateTime.MaxValue;
@@ -73,8 +73,7 @@ public class SearchCommand(SearchOptions options, IStatementService service)
         {
             string filePath = Path.Combine(Path.GetTempPath(), $"fin-{DateTime.Now:yyyyMMddHHmmss}.csv");
             
-            List<string> fileContent = new List<string>();
-            fileContent.Add(options.ShowBalance ? "Date,Description,Amount,Category,Balance" : "Date,Description,Amount,Category");
+            List<string> fileContent = [ options.ShowBalance ? "Date,Description,Amount,Category,Balance" : "Date,Description,Amount,Category" ];
             foreach (ITransaction t in filteredArray)
             {
                 t.Description = t.Description?.Replace(',', ' ');
