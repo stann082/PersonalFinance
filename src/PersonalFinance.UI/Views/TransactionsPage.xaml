@@ -26,6 +26,7 @@
             </Grid>
 
             <CollectionView
+                x:Name="TransactionsList"
                 Grid.Row="1"
                 ItemsSource="{Binding Transactions}"
                 SelectionMode="None">
@@ -33,6 +34,13 @@
                 <CollectionView.ItemTemplate>
                     <DataTemplate>
                         <Grid Padding="8">
+                            <Grid.GestureRecognizers>
+                                <TapGestureRecognizer
+                                    NumberOfTapsRequired="1"
+                                    Command="{Binding BindingContext.OpenTransactionCommand, Source={x:Reference TransactionsList}}"
+                                    CommandParameter="{Binding .}" />
+                            </Grid.GestureRecognizers>
+                            
                             <Label Text="{Binding .}">
                                 <Label.Triggers>
                                     <DataTrigger TargetType="Label"
