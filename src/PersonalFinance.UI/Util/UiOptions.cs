@@ -1,6 +1,6 @@
 using PersonalFinance.Domain.Models;
 
-namespace PersonalFinance.UI;
+namespace PersonalFinance.UI.Util;
 
 public class UiOptions : ISearchOptions
 {

@@ -4,6 +4,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using PersonalFinance.Domain.Models;
 using PersonalFinance.Domain.Services;
+using PersonalFinance.UI.Util;
 using PersonalFinance.UI.Views;
 
 namespace PersonalFinance.UI.ViewModels;
