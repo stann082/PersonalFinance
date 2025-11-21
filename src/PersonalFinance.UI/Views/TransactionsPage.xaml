@@ -32,25 +32,8 @@
 
                 <CollectionView.ItemTemplate>
                     <DataTemplate>
-                        <Grid Padding="8" ColumnDefinitions="*,Auto" RowDefinitions="Auto,Auto">
-                            <!-- Left column: description + date + category -->
-                            <VerticalStackLayout Grid.Column="0" Grid.RowSpan="2">
-                                <Label Text="{Binding Description}"
-                                       FontAttributes="Bold" />
-                                <Label Text="{Binding Date, StringFormat='{}{0:yyyy-MM-dd}'}"
-                                       FontSize="12"
-                                       TextColor="Gray" />
-                                <Label Text="{Binding Category}"
-                                       FontSize="12"
-                                       TextColor="Gray" />
-                            </VerticalStackLayout>
-
-                            <!-- Right column: amount -->
-                            <Label Grid.Column="1"
-                                   Grid.RowSpan="2"
-                                   HorizontalOptions="End"
-                                   VerticalOptions="Center"
-                                   Text="{Binding Amount, StringFormat='{}{0:C}'}" />
+                        <Grid Padding="8">
+                            <Label Text="{Binding .}" />
                         </Grid>
                     </DataTemplate>
                 </CollectionView.ItemTemplate>
