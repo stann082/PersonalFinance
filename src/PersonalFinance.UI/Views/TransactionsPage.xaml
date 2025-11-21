@@ -6,78 +6,39 @@
     Title="Transactions">
 
     <ContentPage.Content>
-        <Grid RowDefinitions="Auto,Auto,*"
-              Padding="10">
+        <Grid RowDefinitions="Auto,*" Padding="10">
 
-            <HorizontalStackLayout Grid.Row="0"
-                                   Spacing="8"
-                                   VerticalOptions="Center">
-                <Label Text="From"
-                       VerticalOptions="Center" />
-                <DatePicker Date="{Binding StartDate}" />
+    <Grid Grid.Row="0"
+          ColumnDefinitions="Auto,Auto,Auto,Auto,*"
+          VerticalOptions="Center"
+          ColumnSpacing="12">
 
-                <Label Text="To"
-                       VerticalOptions="Center"
-                       Margin="16,0,0,0" />
-                <DatePicker Date="{Binding StopDate}" />
-            </HorizontalStackLayout>
-            
-            <HorizontalStackLayout
-                Grid.Row="1"
-                Spacing="10"
-                VerticalOptions="Center">
+        <Label Grid.Column="0" Text="From" VerticalOptions="Center" />
+        <DatePicker Grid.Column="1" Date="{Binding StartDate}" />
 
-                <Label Text="Transactions"
-                       FontAttributes="Bold"
-                       FontSize="20" />
+        <Label Grid.Column="2" Text="To" VerticalOptions="Center" Margin="16,0,0,0" />
+        <DatePicker Grid.Column="3" Date="{Binding StopDate}" />
 
-                <Button Text="Refresh"
-                        Command="{Binding LoadTransactionsCommand}"
-                        HorizontalOptions="EndAndExpand" />
-            </HorizontalStackLayout>
+        <Button Grid.Column="4"
+                Text="Refresh Transactions"
+                Command="{Binding LoadTransactionsCommand}"
+                HorizontalOptions="End" />
+    </Grid>
 
-            <CollectionView
-                Grid.Row="2"
-                x:Name="TransactionsList"
-                ItemsSource="{Binding Transactions}"
-                SelectionMode="None">
+    <CollectionView
+        Grid.Row="1"
+        x:Name="TransactionsList"
+        ItemsSource="{Binding Transactions}"
+        SelectionMode="None">
 
-                <CollectionView.ItemTemplate>
-                    <DataTemplate>
-                        <Grid Padding="8"
-                              ColumnDefinitions="*,Auto"
-                              RowDefinitions="Auto,Auto">
-
-                            <!-- 🔹 Double-tap recognizer on the whole row -->
-                            <Grid.GestureRecognizers>
-                                <TapGestureRecognizer
-                                    NumberOfTapsRequired="2"
-                                    Command="{Binding BindingContext.OpenTransactionCommand, Source={x:Reference TransactionsList}}"
-                                    CommandParameter="{Binding .}" />
-                            </Grid.GestureRecognizers>
-
-                            <!-- Left column: description + date + category -->
-                            <VerticalStackLayout Grid.Column="0" Grid.RowSpan="2">
-                                <Label Text="{Binding Description}"
-                                       FontAttributes="Bold" />
-                                <Label Text="{Binding Date, StringFormat='{}{0:yyyy-MM-dd}'}"
-                                       FontSize="12"
-                                       TextColor="Gray" />
-                                <Label Text="{Binding Category}"
-                                       FontSize="12"
-                                       TextColor="Gray" />
-                            </VerticalStackLayout>
-
-                            <!-- Right column: amount -->
-                            <Label Grid.Column="1"
-                                   Grid.RowSpan="2"
-                                   HorizontalOptions="End"
-                                   VerticalOptions="Center"
-                                   Text="{Binding Amount, StringFormat='{}{0:C}'}" />
-                        </Grid>
-                    </DataTemplate>
-                </CollectionView.ItemTemplate>
-            </CollectionView>
-        </Grid>
+        <CollectionView.ItemTemplate>
+            <DataTemplate>
+                <Grid Padding="8">
+                    <Label Text="{Binding .}" />
+                </Grid>
+            </DataTemplate>
+        </CollectionView.ItemTemplate>
+    </CollectionView>
+</Grid>
     </ContentPage.Content>
 </ContentPage>
