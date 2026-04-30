@@ -1,0 +1,26 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Launch CLI",
+      "type": "coreclr",
+      "request": "launch",
+      "preLaunchTask": "build CLI",
+      "program": "${workspaceFolder}/src/../build/Debug/net9.0/PersonalFinance.CLI.dll",
+      "args": [],
+      "cwd": "${workspaceFolder}/src/PersonalFinance.CLI",
+      "console": "integratedTerminal",
+      "stopAtEntry": false
+    },
+    {
+      "name": "Launch UI",
+      "type": "coreclr",
+      "request": "launch",
+      "preLaunchTask": "build UI",
+      "program": "${workspaceFolder}/src/PersonalFinance.UI/bin/Debug/net9.0-windows10.0.19041.0/PersonalFinance.UI.exe",
+      "cwd": "${workspaceFolder}/src/PersonalFinance.UI",
+      "console": "integratedTerminal",
+      "stopAtEntry": false
+    }
+  ]
+}
