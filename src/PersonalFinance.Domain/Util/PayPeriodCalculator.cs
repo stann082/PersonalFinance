@@ -3,12 +3,12 @@ using PersonalFinance.Domain.Models;
 
 namespace PersonalFinance.Domain.Util;
 
-public class PayPeriodCalculator
+public static class PayPeriodCalculator
 {
 
     #region Public Methods
 
-    public (string? startDateId, string? endDateId) Calculate(Transaction[] transactions, string payPeriod, string description)
+    public static (string? startDateId, string? endDateId) Calculate(Transaction[] transactions, string payPeriod, string description)
     {
         if (!DateTime.TryParseExact(payPeriod, "MMMMyyyy", CultureInfo.InvariantCulture, DateTimeStyles.None, out var periodDate))
         {

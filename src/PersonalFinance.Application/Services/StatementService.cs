@@ -11,17 +11,22 @@ public class StatementService(IMongoDatabase database) : IStatementService
 
     public async Task<Transaction[]> GetAsync(ISearchOptions? options = null)
     {
+        return await GetAsync(options?.StartDate, options?.StopDate);
+    }
+
+    public async Task<Transaction[]> GetAsync(DateTime? startDate = null, DateTime? stopDate = null)
+    {
         var collection = GetTransactionsCollection();
         var b = Builders<Transaction>.Filter;
 
         var filters = new List<FilterDefinition<Transaction>>();
 
-        if (options?.StartDate is { } start)
+        if (startDate is { } start)
         {
             filters.Add(b.Gte(t => t.Date, start));
         }
 
-        if (options?.StopDate is { } stop)
+        if (stopDate is { } stop)
         {
             filters.Add(b.Lte(t => t.Date, stop));
         }
@@ -31,8 +36,7 @@ public class StatementService(IMongoDatabase database) : IStatementService
             .Find(finalFilter)
             .SortBy(t => t.Date)
             .ToListAsync();
-
-        return result.Cast<Transaction>().ToArray();
+        return result.ToArray();
     }
 
     public async Task<DeleteResult> DeleteAsync(string? id)

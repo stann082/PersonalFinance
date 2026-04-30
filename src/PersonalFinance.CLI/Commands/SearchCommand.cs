@@ -13,17 +13,15 @@ public class SearchCommand(SearchOptions options, IStatementService service)
 
     public async Task<int> Execute()
     {
-        IEnumerable<Transaction> allTransactions = await service.GetAsync();
+        IEnumerable<Transaction> allTransactions = await service.GetAsync(options);
 
         DateTime startDate = DateTime.MinValue;
         DateTime stopDate = DateTime.MaxValue;
         if (!string.IsNullOrEmpty(options.PayPeriod))
         {
-            Transaction[] allTransactionArray = allTransactions.ToArray();
-            var payPeriodCalculator = new PayPeriodCalculator();
-            (string? startDateId, string? endDateId) = payPeriodCalculator.Calculate(allTransactionArray, options.PayPeriod, Constants.PayPeriodDescription);
-            startDate = allTransactionArray.FirstOrDefault(t => t.TransactionId == startDateId)?.Date ?? DateTime.MinValue;
-            stopDate = allTransactionArray.FirstOrDefault(t => t.TransactionId == endDateId)?.Date ?? DateTime.MaxValue;
+            var dateRange = await new PayPeriodTransactionsProvider(service).GetDateRangeAsync(options.PayPeriod);
+            startDate = dateRange.StartDate ?? DateTime.MinValue;
+            stopDate = dateRange.StopDate ?? DateTime.MaxValue;
         }
 
         string after = options.GetFilterValue("after");

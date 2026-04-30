@@ -1,9 +1,11 @@
 using System.Collections.ObjectModel;
 using System.Diagnostics;
+using System.Globalization;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using PersonalFinance.Domain.Models;
 using PersonalFinance.Domain.Services;
+using PersonalFinance.Domain.Util;
 using PersonalFinance.UI.Util;
 using PersonalFinance.UI.Views;
 
@@ -19,7 +21,8 @@ public partial class TransactionsViewModel : ObservableObject
         _statementService = statementService;
         LoadTransactionsCommand = new AsyncRelayCommand(LoadTransactionsAsync);
         OpenTransactionCommand = new AsyncRelayCommand<Transaction?>(OpenTransactionAsync);
-        InitializeDateFilter();
+        InitializePayPeriods();
+        _ = InitializeDateFilterAsync();
         _ = LoadTransactionsAsync();
     }
 
@@ -27,9 +30,17 @@ public partial class TransactionsViewModel : ObservableObject
 
     #region Properties
 
+    public bool IsPayPeriodEnabled => !UseDateRange;
+    public bool IsDateRangeEnabled => UseDateRange;
     public IAsyncRelayCommand LoadTransactionsCommand { get; }
     public IAsyncRelayCommand<Transaction?> OpenTransactionCommand { get; }
 
+    [ObservableProperty]
+    private ObservableCollection<string> payPeriods = new();
+    
+    [ObservableProperty]
+    private string? selectedPayPeriod;
+    
     [ObservableProperty]
     private ObservableCollection<Transaction> _transactions = new();
     
@@ -38,6 +49,9 @@ public partial class TransactionsViewModel : ObservableObject
 
     [ObservableProperty]
     private DateTime _stopDate;
+    
+    [ObservableProperty]
+    private bool useDateRange;
 
     #endregion
 
@@ -53,11 +67,33 @@ public partial class TransactionsViewModel : ObservableObject
     {
         try
         {
-            Transaction[] transactions = await GetTransactionsAsync();
-            Transactions.Clear();
-            foreach (var transaction in transactions.OrderByDescending(t => t.Date))
+            Transaction[] transactions;
+
+            if (UseDateRange)
             {
-                Transactions.Add(transaction);
+                var options = new UiOptions
+                {
+                    StartDate = StartDate,
+                    StopDate = StopDate
+                };
+                
+                transactions = await _statementService.GetAsync(options);
+            }
+            else
+            {
+                var payPeriod = SelectedPayPeriod ?? DateTime.Today.ToString("MMMMyyyy", CultureInfo.InvariantCulture);
+                transactions = await new PayPeriodTransactionsProvider(_statementService).GetTransactionsAsync(payPeriod);
+                if (transactions.Length > 0)
+                {
+                    StartDate = transactions.Min(t => t.Date);
+                    StopDate  = transactions.Max(t => t.Date);
+                }
+            }
+
+            Transactions.Clear();
+            foreach (var t in transactions.OrderByDescending(t => t.Date))
+            {
+                Transactions.Add(t);
             }
         }
         catch (Exception ex)
@@ -65,7 +101,7 @@ public partial class TransactionsViewModel : ObservableObject
             Debug.WriteLine(ex);
         }
     }
-
+    
     private async Task OpenTransactionAsync(Transaction? transaction)
     {
         if (transaction is null)
@@ -83,23 +119,28 @@ public partial class TransactionsViewModel : ObservableObject
 
     #region Helper Methods
 
-    private void InitializeDateFilter()
+    private async Task InitializeDateFilterAsync()
     {
-        DateTime today = DateTime.Today;
-        StartDate = new DateTime(today.Year, today.Month, 1).AddDays(-2);
-        StopDate = today;
+        string payPeriod = $"{DateTime.Today:MMMM}{DateTime.Today.Year}";
+        var dateRange = await new PayPeriodTransactionsProvider(_statementService).GetDateRangeAsync(payPeriod);
+        StartDate = dateRange.StartDate ?? DateTime.MinValue;
+        StopDate = dateRange.StopDate ?? DateTime.MaxValue;
     }
 
-    private async Task<Transaction[]> GetTransactionsAsync()
+    private void InitializePayPeriods()
     {
-        UiOptions options = new UiOptions
+        PayPeriods.Clear();
+
+        var today = DateTime.Today;
+        for (int i = 0; i < 12; i++)
         {
-            StartDate = StartDate,
-            StopDate = StopDate
-        };
-        return await _statementService.GetAsync(options);
-    }
+            var d = new DateTime(today.Year, today.Month, 1).AddMonths(-i);
+            PayPeriods.Add(d.ToString("MMMMyyyy", CultureInfo.InvariantCulture));
+        }
 
+        SelectedPayPeriod = PayPeriods.FirstOrDefault();
+    }
+    
     partial void OnStartDateChanged(DateTime value)
     {
         StartDate = value;
@@ -110,6 +151,12 @@ public partial class TransactionsViewModel : ObservableObject
     {
         StopDate = value;
         _ = LoadTransactionsAsync();
+    }
+    
+    partial void OnUseDateRangeChanged(bool value)
+    {
+        OnPropertyChanged(nameof(IsPayPeriodEnabled));
+        OnPropertyChanged(nameof(IsDateRangeEnabled));
     }
     
     #endregion

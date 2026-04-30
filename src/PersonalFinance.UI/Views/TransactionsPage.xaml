@@ -9,22 +9,49 @@
         <Grid RowDefinitions="Auto,*" Padding="10">
 
             <Grid Grid.Row="0"
-                ColumnDefinitions="Auto,Auto,Auto,Auto,*"
-                VerticalOptions="Center"
-                ColumnSpacing="12">
+                  ColumnDefinitions="Auto,Auto,Auto,Auto,Auto,Auto,Auto,*"
+                  VerticalOptions="Center"
+                  ColumnSpacing="8">
+                
+                <!-- Pay period dropdown -->
+                <Label Grid.Column="0"
+                       Text="Pay period"
+                       VerticalOptions="Center" />
+                <Picker Grid.Column="1"
+                        ItemsSource="{Binding PayPeriods}"
+                        SelectedItem="{Binding SelectedPayPeriod}"
+                        IsEnabled="{Binding IsPayPeriodEnabled}"
+                        HorizontalOptions="Start"
+                        WidthRequest="150" />
+                
+                <!-- Spacer -->
+                <Label Grid.Column="2"
+                       Text=""
+                       WidthRequest="16" />
+                
+                <!-- Use date range checkbox -->
+                <CheckBox Grid.Column="3"
+                          IsChecked="{Binding UseDateRange}" 
+                          VerticalOptions="Center" />
+                <Label Grid.Column="4"
+                       Text="Use date range"
+                       VerticalOptions="Center" />
 
-                <Label Grid.Column="0" Text="From" VerticalOptions="Center" />
-                <DatePicker Grid.Column="1" Date="{Binding StartDate}" />
+                <!-- Date pickers -->
+                <Label Grid.Column="5" Text="From" VerticalOptions="Center" />
+                <DatePicker Grid.Column="6" Date="{Binding StartDate}" />
 
-                <Label Grid.Column="2" Text="To" VerticalOptions="Center" Margin="16,0,0,0" />
-                <DatePicker Grid.Column="3" Date="{Binding StopDate}" />
+                <Label Grid.Column="7" Text="To" VerticalOptions="Center" />
+                <DatePicker Grid.Column="8" Date="{Binding StopDate}" />
 
-                <Button Grid.Column="4"
+                <!-- Refresh button -->
+                <Button Grid.Column="9"
                     Text="Refresh Transactions"
                     Command="{Binding LoadTransactionsCommand}"
                     HorizontalOptions="End" />
             </Grid>
 
+            <!-- Transaction list -->
             <CollectionView
                 x:Name="TransactionsList"
                 Grid.Row="1"
@@ -34,6 +61,7 @@
                 <CollectionView.ItemTemplate>
                     <DataTemplate>
                         <Grid Padding="8">
+                            
                             <Grid.GestureRecognizers>
                                 <TapGestureRecognizer
                                     NumberOfTapsRequired="1"
@@ -50,6 +78,7 @@
                                     </DataTrigger>
                                 </Label.Triggers>
                             </Label>
+                            
                         </Grid>
                     </DataTemplate>
                 </CollectionView.ItemTemplate>
