@@ -1,0 +1,100 @@
+﻿using PersonalFinance.CLI.Options;
+using PersonalFinance.Domain.Misc;
+using PersonalFinance.Domain.Models;
+using PersonalFinance.Domain.Services;
+using PersonalFinance.Domain.Util;
+
+namespace PersonalFinance.CLI.Commands;
+
+public class ExportCommand(ExportOptions options, IStatementService service)
+{
+
+    #region Constants
+
+    private const string PayPeriodDescription = "TIMECLOCK PLUS L DES:DIRECT DEP";
+
+    #endregion
+
+    #region Public Methods
+
+    public async Task<int> Execute()
+    {
+        IEnumerable<ITransaction> allTransactions = await service.GetAsync();
+
+        DateTime startDate = options.StartDate != string.Empty && DateTime.TryParse(options.StartDate, out var parsedStartDate) ? parsedStartDate : DateTime.MinValue;
+        DateTime stopDate = options.StopDate != string.Empty && DateTime.TryParse(options.StopDate, out var parsedStopDate) ? parsedStopDate : DateTime.MaxValue;
+
+        var periodTransactions = allTransactions.Where(t => t.Date >= startDate && t.Date <= stopDate).ToArray();
+
+        IEnumerable<ITransaction> filteredTransactions = periodTransactions;
+        if (!string.IsNullOrEmpty(options.Query))
+        {
+            filteredTransactions = filteredTransactions.Where(t =>
+                t.Description != null &&
+                t.Description.Contains(options.Query, StringComparison.OrdinalIgnoreCase));
+        }
+
+        var filteredArray = filteredTransactions.ToArray();
+        string filePath = Path.Combine(Path.GetTempPath(), $"fin-{DateTime.Now:yyyyMMddHHmmss}.csv");
+
+        List<string> fileContent = [options.ShowBalance ? "Date,Description,Amount,Category,Balance" : "Date,Description,Amount,Category"];
+        foreach (ITransaction t in filteredArray)
+        {
+            t.Description = t.Description?.Replace(',', ' ');
+            fileContent.Add(options.ShowBalance
+                ? $"{t.Date:d},{t.Description},{Math.Abs(t.Amount)},{t.Category},{t.Balance}"
+                : $"{t.Date:d},{t.Description},{Math.Abs(t.Amount)},{t.Category}");
+        }
+
+        await File.WriteAllLinesAsync(filePath, fileContent);
+        Console.WriteLine($"The transactions were exported to {filePath}");
+        return await Task.FromResult(0);
+    }
+
+    #endregion
+
+    #region Helper Methods
+
+    private static void DisplayTotals(ITransaction[] periodTransactions, ITransaction[] filteredTransactions)
+    {
+        var debits = periodTransactions.Where(t => t.Amount < 0).Select(t => Math.Abs(t.Amount)).Sum();
+        var credits = periodTransactions.Where(t => t.Amount > 0).Select(t => t.Amount).Sum();
+        Console.WriteLine($"\n     Money spent: ${Math.Abs(debits):N2}");
+        Console.WriteLine($"  Money received: ${credits:N2}");
+        Console.WriteLine($"      Money left: ${credits - debits:N2}\n");
+
+        var recurringDebits = filteredTransactions.Where(t => t is { IsRecurring: true })
+            .Select(t => t.Amount).Sum();
+        if (recurringDebits != 0) Console.WriteLine($"       Recurring expenses: ${Math.Abs(recurringDebits):N2}");
+
+        var nonRecurringDebits = filteredTransactions.Where(t => t is { IsRecurring: false })
+            .Select(t => t.Amount).Sum();
+        if (nonRecurringDebits != 0) Console.WriteLine($"        One-time expenses: ${Math.Abs(nonRecurringDebits):N2}");
+
+        Console.ForegroundColor = ConsoleColor.Red;
+        Console.WriteLine("\nMoney received highlighted in red\n");
+        Console.ResetColor();
+    }
+
+    private static void FormatAndPrintTransactions(ITransaction[] transactions, int? wrapLength)
+    {
+        var length = wrapLength ?? 500;
+        var limitTo = length - 3;
+        foreach (var transaction in transactions)
+        {
+            var formattedAmount = $"${Math.Abs(transaction.Amount)}".PadLeft(10);
+            var formattedDescription = transaction.Description?.Length > length
+                ? transaction.Description[..limitTo] + "..."
+                : transaction.Description;
+
+            Console.ForegroundColor = transaction.TransactionType == TransactionType.Credit
+                ? ConsoleColor.Red
+                : ConsoleColor.Gray;
+            Console.WriteLine($"{transaction.Date}\t{formattedAmount}\t{formattedDescription}");
+            Console.ResetColor();
+        }
+    }
+
+    #endregion
+
+}
