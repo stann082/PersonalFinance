@@ -1,4 +1,5 @@
-﻿using PersonalFinance.CLI.Options;
+﻿using System.Text.RegularExpressions;
+using PersonalFinance.CLI.Options;
 using PersonalFinance.Domain.Misc;
 using PersonalFinance.Domain.Models;
 using PersonalFinance.Domain.Services;
@@ -41,6 +42,12 @@ public class ExportCommand(ExportOptions options, IStatementService service)
         foreach (ITransaction t in filteredArray)
         {
             t.Description = t.Description?.Replace(',', ' ');
+
+            if (options.Obscure)
+            {
+                t.Description = ObscurePersonalName(t.Description, "Stan", "Bennett");
+            }
+
             fileContent.Add(options.ShowBalance
                 ? $"{t.Date:d},{t.Description},{Math.Abs(t.Amount)},{t.Category},{t.Balance}"
                 : $"{t.Date:d},{t.Description},{Math.Abs(t.Amount)},{t.Category}");
@@ -52,47 +59,31 @@ public class ExportCommand(ExportOptions options, IStatementService service)
     }
 
     #endregion
-
     #region Helper Methods
 
-    private static void DisplayTotals(ITransaction[] periodTransactions, ITransaction[] filteredTransactions)
+    private static string ObscurePersonalName(string? description, string firstName, string lastName)
     {
-        var debits = periodTransactions.Where(t => t.Amount < 0).Select(t => Math.Abs(t.Amount)).Sum();
-        var credits = periodTransactions.Where(t => t.Amount > 0).Select(t => t.Amount).Sum();
-        Console.WriteLine($"\n     Money spent: ${Math.Abs(debits):N2}");
-        Console.WriteLine($"  Money received: ${credits:N2}");
-        Console.WriteLine($"      Money left: ${credits - debits:N2}\n");
-
-        var recurringDebits = filteredTransactions.Where(t => t is { IsRecurring: true })
-            .Select(t => t.Amount).Sum();
-        if (recurringDebits != 0) Console.WriteLine($"       Recurring expenses: ${Math.Abs(recurringDebits):N2}");
-
-        var nonRecurringDebits = filteredTransactions.Where(t => t is { IsRecurring: false })
-            .Select(t => t.Amount).Sum();
-        if (nonRecurringDebits != 0) Console.WriteLine($"        One-time expenses: ${Math.Abs(nonRecurringDebits):N2}");
-
-        Console.ForegroundColor = ConsoleColor.Red;
-        Console.WriteLine("\nMoney received highlighted in red\n");
-        Console.ResetColor();
-    }
-
-    private static void FormatAndPrintTransactions(ITransaction[] transactions, int? wrapLength)
-    {
-        var length = wrapLength ?? 500;
-        var limitTo = length - 3;
-        foreach (var transaction in transactions)
+        if (string.IsNullOrWhiteSpace(description))
         {
-            var formattedAmount = $"${Math.Abs(transaction.Amount)}".PadLeft(10);
-            var formattedDescription = transaction.Description?.Length > length
-                ? transaction.Description[..limitTo] + "..."
-                : transaction.Description;
-
-            Console.ForegroundColor = transaction.TransactionType == TransactionType.Credit
-                ? ConsoleColor.Red
-                : ConsoleColor.Gray;
-            Console.WriteLine($"{transaction.Date}\t{formattedAmount}\t{formattedDescription}");
-            Console.ResetColor();
+            return description ?? string.Empty;
         }
+
+        var firstToken = Regex.Escape(firstName);
+        var lastToken = Regex.Escape(lastName);
+
+        var firstVariant = $@"{firstToken}[A-Za-z]*";
+        var middleSuffix = @"(?:[\s\p{P}]+[A-Za-z]\.?)?";
+        var separator = @"[\s\p{P}]*";
+
+        var patterns = new[]
+        {
+            $@"\b{firstVariant}{middleSuffix}{separator}{lastToken}\b",
+            $@"\b{lastToken}{separator}{firstVariant}{middleSuffix}\b",
+            $@"\b{lastToken}\s*,\s*{firstVariant}{middleSuffix}\b"
+        };
+
+        var regex = new Regex(string.Join("|", patterns), RegexOptions.IgnoreCase);
+        return regex.Replace(description, "[REDACTED]");
     }
 
     #endregion
