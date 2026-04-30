@@ -29,6 +29,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\PersonalFinance.Application\PersonalFinance.Application.csproj" />
+    <ProjectReference Include="..\..\src\PersonalFinance.CLI\PersonalFinance.CLI.csproj" />
   </ItemGroup>
 
 </Project>
