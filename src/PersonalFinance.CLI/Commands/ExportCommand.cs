@@ -1,9 +1,9 @@
 ﻿using System.Text.RegularExpressions;
 using PersonalFinance.CLI.Options;
+using PersonalFinance.CLI.Util;
 using PersonalFinance.Domain.Misc;
 using PersonalFinance.Domain.Models;
 using PersonalFinance.Domain.Services;
-using PersonalFinance.Domain.Util;
 
 namespace PersonalFinance.CLI.Commands;
 
@@ -45,7 +45,7 @@ public class ExportCommand(ExportOptions options, IStatementService service)
 
             if (options.Obscure)
             {
-                t.Description = ObscurePersonalName(t.Description, "Stan", "Bennett");
+                t.Description = PersonalNameObscurer.Obscure(t.Description, "Stan", "Bennett");
             }
 
             fileContent.Add(options.ShowBalance
@@ -56,34 +56,6 @@ public class ExportCommand(ExportOptions options, IStatementService service)
         await File.WriteAllLinesAsync(filePath, fileContent);
         Console.WriteLine($"The transactions were exported to {filePath}");
         return await Task.FromResult(0);
-    }
-
-    #endregion
-    #region Helper Methods
-
-    private static string ObscurePersonalName(string? description, string firstName, string lastName)
-    {
-        if (string.IsNullOrWhiteSpace(description))
-        {
-            return description ?? string.Empty;
-        }
-
-        var firstToken = Regex.Escape(firstName);
-        var lastToken = Regex.Escape(lastName);
-
-        var firstVariant = $@"{firstToken}[A-Za-z]*";
-        var middleSuffix = @"(?:[\s\p{P}]+[A-Za-z]\.?)?";
-        var separator = @"[\s\p{P}]*";
-
-        var patterns = new[]
-        {
-            $@"\b{firstVariant}{middleSuffix}{separator}{lastToken}\b",
-            $@"\b{lastToken}{separator}{firstVariant}{middleSuffix}\b",
-            $@"\b{lastToken}\s*,\s*{firstVariant}{middleSuffix}\b"
-        };
-
-        var regex = new Regex(string.Join("|", patterns), RegexOptions.IgnoreCase);
-        return regex.Replace(description, "[REDACTED]");
     }
 
     #endregion
