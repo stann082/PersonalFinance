@@ -1,0 +1,70 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "build CLI",
+      "type": "process",
+      "command": "dotnet",
+      "args": [
+        "build",
+        "${workspaceFolder}/src/PersonalFinance.CLI/PersonalFinance.CLI.csproj",
+        "--configuration",
+        "Debug"
+      ],
+      "problemMatcher": ["$msCompile"],
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      }
+    },
+    {
+      "label": "build UI",
+      "type": "process",
+      "command": "dotnet",
+      "args": [
+        "build",
+        "${workspaceFolder}/src/PersonalFinance.UI/PersonalFinance.UI.csproj",
+        "--configuration",
+        "Debug"
+      ],
+      "problemMatcher": ["$msCompile"],
+      "group": "build"
+    },
+    {
+      "label": "run CLI",
+      "type": "process",
+      "command": "dotnet",
+      "args": [
+        "run",
+        "--project",
+        "${workspaceFolder}/src/PersonalFinance.CLI/PersonalFinance.CLI.csproj",
+        "--configuration",
+        "Debug"
+      ],
+      "problemMatcher": ["$msCompile"],
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared"
+      }
+    },
+    {
+      "label": "run UI",
+      "type": "process",
+      "command": "dotnet",
+      "args": [
+        "run",
+        "--project",
+        "${workspaceFolder}/src/PersonalFinance.UI/PersonalFinance.UI.csproj",
+        "--framework",
+        "net9.0-windows10.0.19041.0",
+        "--configuration",
+        "Debug"
+      ],
+      "problemMatcher": ["$msCompile"],
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared"
+      }
+    }
+  ]
+}
