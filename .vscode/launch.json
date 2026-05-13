@@ -7,7 +7,7 @@
       "request": "launch",
       "preLaunchTask": "build CLI",
       "program": "${workspaceFolder}/src/../build/Debug/net9.0/PersonalFinance.CLI.dll",
-      "args": ["export", "--start-date=2026-01-01", "--stop-date=2026-01-31"],
+      "args": ["search", "--pay-period", "May2026"],
       "cwd": "${workspaceFolder}/src/PersonalFinance.CLI",
       "console": "integratedTerminal",
       "stopAtEntry": false
