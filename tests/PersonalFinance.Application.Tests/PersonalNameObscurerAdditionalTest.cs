@@ -23,7 +23,7 @@ public class PersonalNameObscurerAdditionalTest
         var actual = PersonalNameObscurer.Obscure("   ", "Jon", "Smith");
 
         // Assert
-        Assert.That(actual, "   ");
+        Assert.That(actual, Is.EqualTo("   "));
     }
 
     [Test]
