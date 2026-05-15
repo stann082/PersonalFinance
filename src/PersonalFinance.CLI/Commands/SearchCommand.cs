@@ -9,6 +9,12 @@ namespace PersonalFinance.CLI.Commands;
 public class SearchCommand(SearchOptions options, IStatementService service)
 {
 
+    #region Constants
+
+    private const string PayPeriodDescription = "TIMECLOCK PLUS L DES";
+
+    #endregion
+
     #region Public Methods
 
     public async Task<int> Execute()
@@ -35,7 +41,7 @@ public class SearchCommand(SearchOptions options, IStatementService service)
         {
             stopDate = DateTime.TryParse(before, out var afterDate) ? afterDate : DateTime.MaxValue;
         }
-        
+
         var periodTransactions = allTransactions.Where(t => t.Date >= startDate && t.Date <= stopDate).ToArray();
 
         IEnumerable<Transaction> filteredTransactions = periodTransactions;
@@ -56,7 +62,7 @@ public class SearchCommand(SearchOptions options, IStatementService service)
         if (!string.IsNullOrEmpty(options.Query))
         {
             filteredTransactions = filteredTransactions.Where(t =>
-                t.Description != null && 
+                t.Description != null &&
                 t.Description.Contains(options.Query, StringComparison.OrdinalIgnoreCase));
         }
 
@@ -93,18 +99,16 @@ public class SearchCommand(SearchOptions options, IStatementService service)
 
     private static void DisplayTotals(Transaction[] periodTransactions, Transaction[] filteredTransactions)
     {
-        var debits = periodTransactions.Where(t => t.Amount < 0).Select(t => Math.Abs(t.Amount)).Sum();
-        var credits = periodTransactions.Where(t => t.Amount > 0).Select(t => t.Amount).Sum();
+        var debits = periodTransactions.Where(t => t.Amount < 0).Sum(t => Math.Abs(t.Amount));
+        var credits = periodTransactions.Where(t => t.Amount > 0).Sum(t => t.Amount);
         Console.WriteLine($"\n     Money spent: ${Math.Abs(debits):N2}");
         Console.WriteLine($"  Money received: ${credits:N2}");
         Console.WriteLine($"      Money left: ${credits - debits:N2}\n");
 
-        var recurringDebits = filteredTransactions.Where(t => t is { IsRecurring: true })
-            .Select(t => t.Amount).Sum();
+        var recurringDebits = filteredTransactions.Where(t => t is { IsRecurring: true }).Sum(t => t.Amount);
         if (recurringDebits != 0) Console.WriteLine($"       Recurring expenses: ${Math.Abs(recurringDebits):N2}");
 
-        var nonRecurringDebits = filteredTransactions.Where(t => t is { IsRecurring: false })
-            .Select(t => t.Amount).Sum();
+        var nonRecurringDebits = filteredTransactions.Where(t => t is { IsRecurring: false }).Sum(t => t.Amount);
         if (nonRecurringDebits != 0) Console.WriteLine($"        One-time expenses: ${Math.Abs(nonRecurringDebits):N2}");
 
         Console.ForegroundColor = ConsoleColor.Red;
@@ -132,5 +136,5 @@ public class SearchCommand(SearchOptions options, IStatementService service)
     }
 
     #endregion
-    
+
 }

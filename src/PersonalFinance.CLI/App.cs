@@ -13,11 +13,12 @@ public class App(IBankStatementParser statementParser, IStatementService stateme
 
     public async Task<int> RunApp(IEnumerable<string> args)
     {
-        return await Parser.Default.ParseArguments<SaveOptions, SearchOptions, RemoveOptions, ReviewOptions>(args).MapResult(
+        return await Parser.Default.ParseArguments<SaveOptions, SearchOptions, RemoveOptions, ReviewOptions, ExportOptions>(args).MapResult(
                 async (SaveOptions opts) => await new SaveCommand(opts, statementParser, statementService, transactionCategorizer).Execute(),
                 async (SearchOptions opts) => await new SearchCommand(opts, statementService).Execute(),
                 async (RemoveOptions opts) => await new RemoveCommand(opts, statementService).Execute(),
                 async (ReviewOptions opts) => await new ReviewCommand(opts, statementService, transactionCategorizer).Execute(),
+                async (ExportOptions opts) => await new ExportCommand(opts, statementService).Execute(),
                 _ => Task.FromResult(1));
     }
 
