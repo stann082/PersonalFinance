@@ -143,20 +143,24 @@ public partial class TransactionsViewModel : ObservableObject
     
     partial void OnStartDateChanged(DateTime value)
     {
-        StartDate = value;
         _ = LoadTransactionsAsync();
     }
 
     partial void OnStopDateChanged(DateTime value)
     {
-        StopDate = value;
         _ = LoadTransactionsAsync();
     }
-    
+
+    partial void OnSelectedPayPeriodChanged(string? value)
+    {
+        _ = LoadTransactionsAsync();
+    }
+
     partial void OnUseDateRangeChanged(bool value)
     {
         OnPropertyChanged(nameof(IsPayPeriodEnabled));
         OnPropertyChanged(nameof(IsDateRangeEnabled));
+        _ = LoadTransactionsAsync();
     }
     
     #endregion

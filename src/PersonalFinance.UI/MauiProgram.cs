@@ -25,7 +25,8 @@ public static class MauiProgram
 #endif
 
         builder.Services.AddScoped<IStatementService, StatementService>();
-        builder.Services.AddSingleton<IMongoDatabase>(_ => new MongoClient("mongodb://localhost:27017").GetDatabase("financial_data"));
+        var mongoConnectionString = Environment.GetEnvironmentVariable("MONGO_CONNECTION_STRING") ?? "mongodb://localhost:27017";
+        builder.Services.AddSingleton<IMongoDatabase>(_ => new MongoClient(mongoConnectionString).GetDatabase("financial_data"));
         builder.Services.AddTransient<TransactionsViewModel>();
         builder.Services.AddTransient<TransactionsPage>();
         return builder.Build();
