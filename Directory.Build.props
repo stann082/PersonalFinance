@@ -1,0 +1,7 @@
+<Project>
+  <ItemGroup>
+    <!-- Suppress moderate SharpCompress advisory (GHSA-6c8g-7p36-r338).
+         Transitive via MongoDB.Driver; not directly exploitable here. -->
+    <NuGetAuditSuppress Include="https://github.com/advisories/GHSA-6c8g-7p36-r338" />
+  </ItemGroup>
+</Project>

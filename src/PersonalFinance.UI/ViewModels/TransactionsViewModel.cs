@@ -37,19 +37,19 @@ public partial class TransactionsViewModel : ObservableObject
 
     [ObservableProperty]
     private ObservableCollection<string> payPeriods = new();
-    
+
     [ObservableProperty]
     private string? selectedPayPeriod;
-    
+
     [ObservableProperty]
     private ObservableCollection<Transaction> _transactions = new();
-    
+
     [ObservableProperty]
     private DateTime _startDate;
 
     [ObservableProperty]
     private DateTime _stopDate;
-    
+
     [ObservableProperty]
     private bool useDateRange;
 
