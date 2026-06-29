@@ -19,26 +19,24 @@ public class SearchCommand(SearchOptions options, IStatementService service)
 
     public async Task<int> Execute()
     {
-        IEnumerable<ITransaction> allTransactions = await service.GetAsync();
+        IEnumerable<Transaction> allTransactions = await service.GetAsync(options);
 
         DateTime startDate = DateTime.MinValue;
         DateTime stopDate = DateTime.MaxValue;
         if (!string.IsNullOrEmpty(options.PayPeriod))
         {
-            ITransaction[] allTransactionArray = allTransactions.ToArray();
-            var payPeriodCalculator = new PayPeriodCalculator();
-            (string? startDateId, string? endDateId) = payPeriodCalculator.Calculate(allTransactionArray, options.PayPeriod, PayPeriodDescription);
-            startDate = allTransactionArray.FirstOrDefault(t => t.TransactionId == startDateId)?.Date ?? DateTime.MinValue;
-            stopDate = allTransactionArray.FirstOrDefault(t => t.TransactionId == endDateId)?.Date ?? DateTime.MaxValue;
+            var dateRange = await new PayPeriodTransactionsProvider(service).GetDateRangeAsync(options.PayPeriod);
+            startDate = dateRange.StartDate ?? DateTime.MinValue;
+            stopDate = dateRange.StopDate ?? DateTime.MaxValue;
         }
 
-        string? after = options.GetFilterValue("after");
+        string after = options.GetFilterValue("after");
         if (!string.IsNullOrEmpty(after))
         {
             startDate = DateTime.TryParse(after, out var beforeDate) ? beforeDate : DateTime.MinValue;
         }
 
-        string? before = options.GetFilterValue("before");
+        string before = options.GetFilterValue("before");
         if (!string.IsNullOrEmpty(before))
         {
             stopDate = DateTime.TryParse(before, out var afterDate) ? afterDate : DateTime.MaxValue;
@@ -46,7 +44,7 @@ public class SearchCommand(SearchOptions options, IStatementService service)
 
         var periodTransactions = allTransactions.Where(t => t.Date >= startDate && t.Date <= stopDate).ToArray();
 
-        IEnumerable<ITransaction> filteredTransactions = periodTransactions;
+        IEnumerable<Transaction> filteredTransactions = periodTransactions;
         bool? isRecurring = bool.TryParse(options.GetFilterValue("recurring"), out var recurring) ? recurring : null;
         if (isRecurring.HasValue)
         {
@@ -69,10 +67,29 @@ public class SearchCommand(SearchOptions options, IStatementService service)
         }
 
         var filteredArray = filteredTransactions.ToArray();
-        int? wrap = int.TryParse(options.GetFilterValue("wrap"), out var wrapLength) ? wrapLength : null;
-        FormatAndPrintTransactions(filteredArray, wrap);
-        DisplayTotals(periodTransactions, filteredArray);
-
+        if (options.Export)
+        {
+            string filePath = Path.Combine(Path.GetTempPath(), $"fin-{DateTime.Now:yyyyMMddHHmmss}.csv");
+            
+            List<string> fileContent = [ options.ShowBalance ? "Date,Description,Amount,Category,Balance" : "Date,Description,Amount,Category" ];
+            foreach (Transaction t in filteredArray)
+            {
+                t.Description = t.Description?.Replace(',', ' ');
+                fileContent.Add(options.ShowBalance
+                    ? $"{t.Date.ToShortDateString()},{t.Description},{Math.Abs(t.Amount)},{t.Category},{t.Balance}"
+                    : $"{t.Date.ToShortDateString()},{t.Description},{Math.Abs(t.Amount)},{t.Category}");
+            }
+            
+            await File.WriteAllLinesAsync(filePath, fileContent);
+            Console.WriteLine($"The transactions were exported to {filePath}");
+        }
+        else
+        {
+            int? wrap = int.TryParse(options.GetFilterValue("wrap"), out var wrapLength) ? wrapLength : null;
+            FormatAndPrintTransactions(filteredArray, wrap);
+            DisplayTotals(periodTransactions, filteredArray);
+        }
+        
         return await Task.FromResult(0);
     }
 
@@ -80,7 +97,7 @@ public class SearchCommand(SearchOptions options, IStatementService service)
 
     #region Helper Methods
 
-    private static void DisplayTotals(ITransaction[] periodTransactions, ITransaction[] filteredTransactions)
+    private static void DisplayTotals(Transaction[] periodTransactions, Transaction[] filteredTransactions)
     {
         var debits = periodTransactions.Where(t => t.Amount < 0).Sum(t => Math.Abs(t.Amount));
         var credits = periodTransactions.Where(t => t.Amount > 0).Sum(t => t.Amount);
@@ -99,7 +116,7 @@ public class SearchCommand(SearchOptions options, IStatementService service)
         Console.ResetColor();
     }
 
-    private static void FormatAndPrintTransactions(ITransaction[] transactions, int? wrapLength)
+    private static void FormatAndPrintTransactions(Transaction[] transactions, int? wrapLength)
     {
         var length = wrapLength ?? 500;
         var limitTo = length - 3;

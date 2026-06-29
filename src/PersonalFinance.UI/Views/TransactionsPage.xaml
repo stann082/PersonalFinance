@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage
+    x:Class="PersonalFinance.UI.Views.TransactionsPage"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    Title="Transactions">
+
+    <ContentPage.Content>
+        <Grid RowDefinitions="Auto,*" Padding="10">
+
+            <Grid Grid.Row="0"
+                  ColumnDefinitions="Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,*"
+                  VerticalOptions="Center"
+                  ColumnSpacing="8">
+                
+                <!-- Pay period dropdown -->
+                <Label Grid.Column="0"
+                       Text="Pay period"
+                       VerticalOptions="Center" />
+                <Picker Grid.Column="1"
+                        ItemsSource="{Binding PayPeriods}"
+                        SelectedItem="{Binding SelectedPayPeriod}"
+                        IsEnabled="{Binding IsPayPeriodEnabled}"
+                        HorizontalOptions="Start"
+                        WidthRequest="150" />
+                
+                <!-- Spacer -->
+                <Label Grid.Column="2"
+                       Text=""
+                       WidthRequest="16" />
+                
+                <!-- Use date range checkbox -->
+                <CheckBox Grid.Column="3"
+                          IsChecked="{Binding UseDateRange}" 
+                          VerticalOptions="Center" />
+                <Label Grid.Column="4"
+                       Text="Use date range"
+                       VerticalOptions="Center" />
+
+                <!-- Date pickers -->
+                <Label Grid.Column="5" Text="From" VerticalOptions="Center" />
+                <DatePicker Grid.Column="6" Date="{Binding StartDate}" />
+
+                <Label Grid.Column="7" Text="To" VerticalOptions="Center" />
+                <DatePicker Grid.Column="8" Date="{Binding StopDate}" />
+
+                <!-- Refresh button -->
+                <Button Grid.Column="9"
+                    Text="Refresh Transactions"
+                    Command="{Binding LoadTransactionsCommand}"
+                    HorizontalOptions="End" />
+            </Grid>
+
+            <!-- Transaction list -->
+            <CollectionView
+                x:Name="TransactionsList"
+                Grid.Row="1"
+                ItemsSource="{Binding Transactions}"
+                SelectionMode="None">
+
+                <CollectionView.ItemTemplate>
+                    <DataTemplate>
+                        <Grid Padding="8">
+                            
+                            <Grid.GestureRecognizers>
+                                <TapGestureRecognizer
+                                    NumberOfTapsRequired="1"
+                                    Command="{Binding BindingContext.OpenTransactionCommand, Source={x:Reference TransactionsList}}"
+                                    CommandParameter="{Binding .}" />
+                            </Grid.GestureRecognizers>
+                            
+                            <Label Text="{Binding .}">
+                                <Label.Triggers>
+                                    <DataTrigger TargetType="Label"
+                                                 Binding="{Binding IsDeposit}"
+                                                 Value="True">
+                                        <Setter Property="TextColor" Value="Red" />
+                                    </DataTrigger>
+                                </Label.Triggers>
+                            </Label>
+                            
+                        </Grid>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
+        </Grid>
+    </ContentPage.Content>
+</ContentPage>

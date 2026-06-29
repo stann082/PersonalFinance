@@ -22,6 +22,9 @@ public class SearchOptions : ISearchOptions
 
     #region Properties
 
+    public DateTime? StartDate { get; set; } = DateTime.MinValue;
+    public DateTime? StopDate { get; set; } = DateTime.MaxValue;
+
     private Dictionary<string, string> FilterMap => CreateFilterMap();
 
     #endregion
