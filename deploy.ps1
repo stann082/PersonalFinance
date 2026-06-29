@@ -47,9 +47,14 @@ if ($ui) {
     $Shortcut = $WshShell.CreateShortcut($shortcutPath)
     $Shortcut.TargetPath = $exePath
     $Shortcut.WorkingDirectory = Split-Path $exePath
-    $Shortcut.IconLocation = $exePath
+    $Shortcut.IconLocation = "$exePath,0"
     $Shortcut.Description = "Launch PersonalFinance"
     $Shortcut.Save()
+
+    # Flush the Windows shell icon cache so the new icon appears immediately
+    $sig = '[DllImport("shell32.dll")] public static extern void SHChangeNotify(int wEventId, int uFlags, IntPtr dwItem1, IntPtr dwItem2);'
+    Add-Type -MemberDefinition $sig -Name WinAPI -Namespace Shell -ErrorAction SilentlyContinue
+    [Shell.WinAPI]::SHChangeNotify(0x8000000, 0, [IntPtr]::Zero, [IntPtr]::Zero)
 
     Write-Host "Shortcut created successfully!" -ForegroundColor Green
 }
