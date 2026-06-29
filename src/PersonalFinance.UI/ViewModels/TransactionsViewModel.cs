@@ -22,8 +22,6 @@ public partial class TransactionsViewModel : ObservableObject
         LoadTransactionsCommand = new AsyncRelayCommand(LoadTransactionsAsync);
         OpenTransactionCommand = new AsyncRelayCommand<Transaction?>(OpenTransactionAsync);
         InitializePayPeriods();
-        _ = InitializeDateFilterAsync();
-        _ = LoadTransactionsAsync();
     }
 
     #endregion
@@ -58,6 +56,7 @@ public partial class TransactionsViewModel : ObservableObject
     #region Fields
 
     private readonly IStatementService _statementService;
+    private bool _updatingDates;
 
     #endregion
 
@@ -83,18 +82,24 @@ public partial class TransactionsViewModel : ObservableObject
             {
                 var payPeriod = SelectedPayPeriod ?? DateTime.Today.ToString("MMMMyyyy", CultureInfo.InvariantCulture);
                 transactions = await new PayPeriodTransactionsProvider(_statementService).GetTransactionsAsync(payPeriod);
-                if (transactions.Length > 0)
-                {
-                    StartDate = transactions.Min(t => t.Date);
-                    StopDate  = transactions.Max(t => t.Date);
-                }
             }
 
-            Transactions.Clear();
-            foreach (var t in transactions.OrderByDescending(t => t.Date))
+            MainThread.BeginInvokeOnMainThread(() =>
             {
-                Transactions.Add(t);
-            }
+                if (!UseDateRange && transactions.Length > 0)
+                {
+                    _updatingDates = true;
+                    StartDate = transactions.Min(t => t.Date);
+                    StopDate  = transactions.Max(t => t.Date);
+                    _updatingDates = false;
+                }
+
+                Transactions.Clear();
+                foreach (var t in transactions.OrderByDescending(t => t.Date))
+                {
+                    Transactions.Add(t);
+                }
+            });
         }
         catch (Exception ex)
         {
@@ -119,14 +124,6 @@ public partial class TransactionsViewModel : ObservableObject
 
     #region Helper Methods
 
-    private async Task InitializeDateFilterAsync()
-    {
-        string payPeriod = $"{DateTime.Today:MMMM}{DateTime.Today.Year}";
-        var dateRange = await new PayPeriodTransactionsProvider(_statementService).GetDateRangeAsync(payPeriod);
-        StartDate = dateRange.StartDate ?? DateTime.MinValue;
-        StopDate = dateRange.StopDate ?? DateTime.MaxValue;
-    }
-
     private void InitializePayPeriods()
     {
         PayPeriods.Clear();
@@ -143,12 +140,14 @@ public partial class TransactionsViewModel : ObservableObject
     
     partial void OnStartDateChanged(DateTime value)
     {
-        _ = LoadTransactionsAsync();
+        if (!_updatingDates)
+            _ = LoadTransactionsAsync();
     }
 
     partial void OnStopDateChanged(DateTime value)
     {
-        _ = LoadTransactionsAsync();
+        if (!_updatingDates)
+            _ = LoadTransactionsAsync();
     }
 
     partial void OnSelectedPayPeriodChanged(string? value)
