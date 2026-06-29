@@ -26,6 +26,7 @@ if ($ui) {
     Write-Host "`nDeploying MAUI app" -ForegroundColor Cyan
 
     $localApp = "$env:LOCALAPPDATA\PersonalFinance"
+    Get-Process -Name "PersonalFinance.UI" -ErrorAction SilentlyContinue | Stop-Process -Force
     Remove-Item $localApp -Recurse -ErrorAction SilentlyContinue
     dotnet publish .\src\PersonalFinance.UI\PersonalFinance.UI.csproj -f net10.0-windows10.0.19041.0 -c Release -o $localApp -v quiet
 

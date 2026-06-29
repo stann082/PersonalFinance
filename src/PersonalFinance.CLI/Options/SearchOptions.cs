@@ -18,6 +18,12 @@ public class SearchOptions : ISearchOptions
     [Option("pay-period", HelpText = "Enter the pay period (e.g., \"September2024\"")]
     public string PayPeriod { get; set; } = string.Empty;
 
+    [Option('e', "export", HelpText = "Export results to a CSV file.")]
+    public bool Export { get; set; } = false;
+
+    [Option("show-balance", HelpText = "Show balance column in export.")]
+    public bool ShowBalance { get; set; } = false;
+
     #endregion
 
     #region Properties

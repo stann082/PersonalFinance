@@ -20,14 +20,14 @@ public class ExportCommand(ExportOptions options, IStatementService service)
 
     public async Task<int> Execute()
     {
-        IEnumerable<ITransaction> allTransactions = await service.GetAsync();
+        IEnumerable<Transaction> allTransactions = await service.GetAsync();
 
         DateTime startDate = options.StartDate != string.Empty && DateTime.TryParse(options.StartDate, out var parsedStartDate) ? parsedStartDate : DateTime.MinValue;
         DateTime stopDate = options.StopDate != string.Empty && DateTime.TryParse(options.StopDate, out var parsedStopDate) ? parsedStopDate : DateTime.MaxValue;
 
         var periodTransactions = allTransactions.Where(t => t.Date >= startDate && t.Date <= stopDate).ToArray();
 
-        IEnumerable<ITransaction> filteredTransactions = periodTransactions;
+        IEnumerable<Transaction> filteredTransactions = periodTransactions;
         if (!string.IsNullOrEmpty(options.Query))
         {
             filteredTransactions = filteredTransactions.Where(t =>
@@ -39,7 +39,7 @@ public class ExportCommand(ExportOptions options, IStatementService service)
         string filePath = Path.Combine(Path.GetTempPath(), $"fin-{DateTime.Now:yyyyMMddHHmmss}.csv");
 
         List<string> fileContent = [options.ShowBalance ? "Date,Description,Amount,Category,Balance" : "Date,Description,Amount,Category"];
-        foreach (ITransaction t in filteredArray)
+        foreach (Transaction t in filteredArray)
         {
             t.Description = t.Description?.Replace(',', ' ');
 
