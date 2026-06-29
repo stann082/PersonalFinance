@@ -6,7 +6,7 @@
       "type": "coreclr",
       "request": "launch",
       "preLaunchTask": "build CLI",
-      "program": "${workspaceFolder}/src/../build/Debug/net9.0/PersonalFinance.CLI.dll",
+      "program": "${workspaceFolder}/src/../build/Debug/net10.0/PersonalFinance.CLI.dll",
       "args": ["search", "--pay-period", "May2026"],
       "cwd": "${workspaceFolder}/src/PersonalFinance.CLI",
       "console": "integratedTerminal",
@@ -17,7 +17,7 @@
       "type": "coreclr",
       "request": "launch",
       "preLaunchTask": "build UI",
-      "program": "${workspaceFolder}/src/PersonalFinance.UI/bin/Debug/net9.0-windows10.0.19041.0/PersonalFinance.UI.exe",
+      "program": "${workspaceFolder}/src/PersonalFinance.UI/bin/Debug/net10.0-windows10.0.19041.0/PersonalFinance.UI.exe",
       "cwd": "${workspaceFolder}/src/PersonalFinance.UI",
       "console": "integratedTerminal",
       "stopAtEntry": false

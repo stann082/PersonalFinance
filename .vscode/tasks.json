@@ -56,7 +56,7 @@
         "--project",
         "${workspaceFolder}/src/PersonalFinance.UI/PersonalFinance.UI.csproj",
         "--framework",
-        "net9.0-windows10.0.19041.0",
+        "net10.0-windows10.0.19041.0",
         "--configuration",
         "Debug"
       ],
