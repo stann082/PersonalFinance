@@ -32,20 +32,23 @@ public class EditCommand(EditOptions options, IStatementService service)
 
             PrintTransaction(i + 1, transactions.Length, t);
 
-            // --- Recurring prompt ---
-            Console.Write($"  Recurring (currently: {(t.IsRecurring ? "Yes" : "No")}) [y=yes / n=no / enter=keep]: ");
-            var recurringInput = Console.ReadLine()?.Trim().ToLower();
-            bool? newRecurring = recurringInput switch
+            // --- Recurring prompt (debits only) ---
+            if (t.IsRecurring.HasValue)
             {
-                "y" => true,
-                "n" => false,
-                _ => null
-            };
-            if (newRecurring.HasValue && newRecurring.Value != t.IsRecurring)
-            {
-                changes.Add($"Recurring: {(t.IsRecurring ? "Yes" : "No")} → {(newRecurring.Value ? "Yes" : "No")}");
-                t.IsRecurring = newRecurring.Value;
-                Console.WriteLine($"  → Recurring set to {(t.IsRecurring ? "Yes" : "No")}");
+                Console.Write($"  Recurring (currently: {(t.IsRecurring.Value ? "Yes" : "No")}) [y=yes / n=no / enter=keep]: ");
+                var recurringInput = Console.ReadLine()?.Trim().ToLower();
+                bool? newRecurring = recurringInput switch
+                {
+                    "y" => true,
+                    "n" => false,
+                    _ => null
+                };
+                if (newRecurring.HasValue && newRecurring.Value != t.IsRecurring.Value)
+                {
+                    changes.Add($"Recurring: {(t.IsRecurring.Value ? "Yes" : "No")} → {(newRecurring.Value ? "Yes" : "No")}");
+                    t.IsRecurring = newRecurring.Value;
+                    Console.WriteLine($"  → Recurring set to {(t.IsRecurring.Value ? "Yes" : "No")}");
+                }
             }
 
             Console.WriteLine();
@@ -185,7 +188,7 @@ public class EditCommand(EditOptions options, IStatementService service)
     private static void PrintTransaction(int index, int total, Transaction t)
     {
         var amount = $"${Math.Abs(t.Amount):N2}".PadLeft(10);
-        var recurring = t.IsRecurring ? "[Recurring]" : "";
+        var recurring = t.IsRecurring == true ? "[Recurring]" : "";
         Console.ForegroundColor = t.IsDeposit ? ConsoleColor.Red : ConsoleColor.Gray;
         Console.WriteLine($"[{index}/{total}] {t.Date:yyyy-MM-dd}  {amount}  {t.Description}  [{t.Category}]  {recurring}");
         Console.ResetColor();

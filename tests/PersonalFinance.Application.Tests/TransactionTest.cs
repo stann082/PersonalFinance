@@ -175,7 +175,25 @@ public class TransactionTest
     }
 
     [Test]
-    public void Constructor_PreservesIsRecurring()
+    public void Constructor_PreservesIsRecurring_ForDebit()
+    {
+        // Arrange
+        var parsedItem = new MockParsedTransactionItem
+        {
+            IsRecurring = true,
+            Amount = "-100",
+            Date = "01/15/2024"
+        };
+
+        // Act
+        var transaction = new Transaction(parsedItem);
+
+        // Assert
+        Assert.That(transaction.IsRecurring, Is.True);
+    }
+
+    [Test]
+    public void Constructor_SetsIsRecurringNull_ForCredit()
     {
         // Arrange
         var parsedItem = new MockParsedTransactionItem
@@ -188,8 +206,8 @@ public class TransactionTest
         // Act
         var transaction = new Transaction(parsedItem);
 
-        // Assert
-        Assert.That(transaction.IsRecurring, Is.True);
+        // Assert — credits never have a recurring designation
+        Assert.That(transaction.IsRecurring, Is.Null);
     }
 
     [Test]
@@ -347,7 +365,7 @@ public class TransactionTest
     private class MockParsedTransactionItem : IParsedTransactionItem
     {
         public string? Description { get; set; }
-        public bool IsRecurring { get; set; }
+        public bool? IsRecurring { get; set; }
         public string? Amount { get; set; }
         public string? Category { get; set; }
         public string? Date { get; set; }

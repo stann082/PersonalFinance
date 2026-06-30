@@ -76,7 +76,7 @@ public class SearchCommand(SearchOptions options, IStatementService service)
             {
                 t.Description = t.Description?.Replace(',', ' ');
                 var amount = t.TransactionType == TransactionType.Credit ? $"+{t.Amount}" : $"{t.Amount}";
-                var recurringLabel = t.IsRecurring ? "yes" : "no";
+                var recurringLabel = t.IsRecurring switch { true => "yes", false => "no", null => "" };
                 fileContent.Add(options.ShowBalance
                     ? $"{t.Date.ToShortDateString()},{t.Description},{amount},{t.Category},{t.Balance},{recurringLabel}"
                     : $"{t.Date.ToShortDateString()},{t.Description},{amount},{t.Category},{recurringLabel}");
@@ -107,8 +107,8 @@ public class SearchCommand(SearchOptions options, IStatementService service)
         Console.WriteLine($"  Money received: ${credits:N2}");
         Console.WriteLine($"      Money left: ${credits - debits:N2}");
 
-        var recurringDebits = filteredTransactions.Where(t => t.IsRecurring && t.Amount < 0).Sum(t => Math.Abs(t.Amount));
-        var nonRecurringDebits = filteredTransactions.Where(t => !t.IsRecurring && t.Amount < 0).Sum(t => Math.Abs(t.Amount));
+        var recurringDebits = filteredTransactions.Where(t => t.IsRecurring == true && t.Amount < 0).Sum(t => Math.Abs(t.Amount));
+        var nonRecurringDebits = filteredTransactions.Where(t => t.IsRecurring == false && t.Amount < 0).Sum(t => Math.Abs(t.Amount));
 
         if (recurringDebits != 0 || nonRecurringDebits != 0)
         {

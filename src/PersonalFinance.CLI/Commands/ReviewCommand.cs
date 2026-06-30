@@ -59,7 +59,8 @@ public class ReviewCommand(ReviewOptions options, IStatementService service, ITr
             );
 
             var existingTransaction = await transactionsCollection.Find(filter).FirstOrDefaultAsync();
-            if (existingTransaction == null || existingTransaction.IsRecurring == transaction.IsRecurring)
+            if (existingTransaction == null || !transaction.IsRecurring.HasValue
+                || existingTransaction.IsRecurring == transaction.IsRecurring)
             {
                 continue;
             }
@@ -67,7 +68,7 @@ public class ReviewCommand(ReviewOptions options, IStatementService service, ITr
             pending.Add(new PendingUpdate
             {
                 Existing = existingTransaction,
-                DesiredIsRecurring = transaction.IsRecurring
+                DesiredIsRecurring = transaction.IsRecurring.Value
             });
         }
 

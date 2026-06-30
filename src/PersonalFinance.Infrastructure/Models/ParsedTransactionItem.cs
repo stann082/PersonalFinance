@@ -15,5 +15,5 @@ public class ParsedTransactionItem : IParsedTransactionItem
     public string? Date { get; set; }
     public string? Description { get; set; }
     
-    public bool IsRecurring { get; set; }
+    public bool? IsRecurring { get; set; }
 }

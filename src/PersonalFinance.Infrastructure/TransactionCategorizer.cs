@@ -47,7 +47,8 @@ public class TransactionCategorizer : ITransactionCategorizer
             var categoryPrediction = categoryPredictor.Predict(transactionData);
             var recurringPrediction = recurringPredictor.Predict(transactionData);
             transaction.Category = categoryPrediction.PredictedCategory;
-            transaction.IsRecurring = recurringPrediction.PredictedRecurring;
+            if (transaction.IsRecurring.HasValue)
+                transaction.IsRecurring = recurringPrediction.PredictedRecurring;
         }
     }
 

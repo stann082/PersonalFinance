@@ -29,7 +29,7 @@ public class Transaction : ITrainingModelItem
     public DateTime Date { get; set; }
     public string? Description { get; set; }
     public bool IsDeposit => TransactionType == TransactionType.Credit;
-    public bool IsRecurring { get; set; }
+    public bool? IsRecurring { get; set; }
     public string? TransactionId { get; set; }
     public TransactionType TransactionType { get; private set; }
 
@@ -54,7 +54,7 @@ public class Transaction : ITrainingModelItem
         Category = item.Category;
         Date = DateTime.TryParse(item.Date, out var dateResult) ? dateResult : DateTime.MinValue;
         Description = item.Description;
-        IsRecurring = item.IsRecurring;
+        IsRecurring = Amount < 0 ? item.IsRecurring : null;
         TransactionType = Amount < 0 ? TransactionType.Debit : TransactionType.Credit;
     }
 

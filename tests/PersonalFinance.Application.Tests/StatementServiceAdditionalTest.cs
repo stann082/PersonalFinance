@@ -312,7 +312,7 @@ public class StatementServiceAdditionalTest
     private class MockParsedTransactionItem : IParsedTransactionItem
     {
         public string? Description { get; set; }
-        public bool IsRecurring { get; set; }
+        public bool? IsRecurring { get; set; }
         public string? Amount { get; set; }
         public string? Category { get; set; }
         public string? Date { get; set; }

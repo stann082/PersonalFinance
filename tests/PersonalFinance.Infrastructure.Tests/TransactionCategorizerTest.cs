@@ -72,7 +72,7 @@ public class TransactionCategorizerTest
 
         // Assert
         // Recurring status should be set (true or false, not null)
-        Assert.That(transactions[0].IsRecurring, Is.TypeOf<bool>());
+        Assert.That(transactions[0].IsRecurring, Is.Not.Null);
     }
 
     #endregion
@@ -183,7 +183,7 @@ public class TransactionCategorizerTest
             for (int i = 0; i < transactions.Count; i++)
             {
                 Assert.That(transactions[i].Category, Is.Not.Null, $"Transaction {i} should have a category");
-                Assert.That(transactions[i].IsRecurring, Is.TypeOf<bool>(), $"Transaction {i} should have IsRecurring set");
+                Assert.That(transactions[i].IsRecurring, Is.Not.Null, $"Transaction {i} should have IsRecurring set");
             }
         });
     }
@@ -392,7 +392,7 @@ public class TransactionCategorizerTest
     {
         public string? Description { get; set; }
         public string? Category { get; set; }
-        public bool IsRecurring { get; set; }
+        public bool? IsRecurring { get; set; } = false;
     }
 
     #endregion
