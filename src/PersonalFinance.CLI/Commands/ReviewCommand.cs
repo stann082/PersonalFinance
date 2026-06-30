@@ -91,22 +91,17 @@ public class ReviewCommand(ReviewOptions options, IStatementService service, ITr
         const int pageSize = 10;
         int page = 0;
 
-        int pageTop = Console.CursorTop;
-        const int blockHeight = 5 + pageSize + 5;
-
         while (true)
         {
             var pageItems = pending.Skip(page * pageSize).Take(pageSize).ToList();
             if (pageItems.Count == 0)
             {
-                Console.SetCursorPosition(0, pageTop);
-                ClearBlock(pageTop, blockHeight);
+                Console.Clear();
                 Console.WriteLine("No more items.");
                 return;
             }
 
-            Console.SetCursorPosition(0, pageTop);
-            ClearBlock(pageTop, blockHeight);
+            Console.Clear();
             DrawPage(page, pageSize, pending.Count, pageItems);
             WritePromptInline("Enter numbers (comma), 'a' for ALL on page, Enter=skip, n=next, p=prev, q=quit: ");
 
@@ -179,18 +174,6 @@ public class ReviewCommand(ReviewOptions options, IStatementService service, ITr
 
             Console.WriteLine();
             Console.WriteLine("Commands: numbers (e.g. 1,3,5), 'a' (all on page), Enter (skip), n (next), p (prev), q (quit)");
-        }
-
-        static void ClearBlock(int top, int height)
-        {
-            string blank = new string(' ', Math.Max(0, Console.BufferWidth - 1));
-            for (int i = 0; i < height; i++)
-            {
-                Console.SetCursorPosition(0, top + i);
-                Console.Write(blank);
-            }
-
-            Console.SetCursorPosition(0, top);
         }
 
         static void WritePromptInline(string text)
