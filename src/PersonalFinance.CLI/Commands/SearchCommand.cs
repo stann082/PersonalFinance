@@ -86,7 +86,7 @@ public class SearchCommand(SearchOptions options, IStatementService service)
         else
         {
             int? wrap = int.TryParse(options.GetFilterValue("wrap"), out var wrapLength) ? wrapLength : null;
-            FormatAndPrintTransactions(filteredArray, wrap);
+            FormatAndPrintTransactions(filteredArray, wrap, options.ShowBalance);
             DisplayTotals(periodTransactions, filteredArray);
         }
         
@@ -116,7 +116,7 @@ public class SearchCommand(SearchOptions options, IStatementService service)
         Console.ResetColor();
     }
 
-    private static void FormatAndPrintTransactions(Transaction[] transactions, int? wrapLength)
+    private static void FormatAndPrintTransactions(Transaction[] transactions, int? wrapLength, bool showBalance = false)
     {
         var length = wrapLength ?? 500;
         var limitTo = length - 3;
@@ -130,7 +130,11 @@ public class SearchCommand(SearchOptions options, IStatementService service)
             Console.ForegroundColor = transaction.TransactionType == TransactionType.Credit
                 ? ConsoleColor.Red
                 : ConsoleColor.Gray;
-            Console.WriteLine($"{transaction.Date}\t{formattedAmount}\t{formattedDescription}");
+
+            var line = showBalance
+                ? $"{transaction.Date}\t{formattedAmount}\t{transaction.Balance,12:0.00}\t{formattedDescription}"
+                : $"{transaction.Date}\t{formattedAmount}\t{formattedDescription}";
+            Console.WriteLine(line);
             Console.ResetColor();
         }
     }
