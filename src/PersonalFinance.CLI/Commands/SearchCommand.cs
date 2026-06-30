@@ -103,15 +103,23 @@ public class SearchCommand(SearchOptions options, IStatementService service)
     {
         var debits = periodTransactions.Where(t => t.Amount < 0).Sum(t => Math.Abs(t.Amount));
         var credits = periodTransactions.Where(t => t.Amount > 0).Sum(t => t.Amount);
-        Console.WriteLine($"\n     Money spent: ${Math.Abs(debits):N2}");
+        Console.WriteLine($"\n     Money spent: ${debits:N2}");
         Console.WriteLine($"  Money received: ${credits:N2}");
-        Console.WriteLine($"      Money left: ${credits - debits:N2}\n");
+        Console.WriteLine($"      Money left: ${credits - debits:N2}");
 
-        var recurringDebits = filteredTransactions.Where(t => t is { IsRecurring: true }).Sum(t => t.Amount);
-        if (recurringDebits != 0) Console.WriteLine($"       Recurring expenses: ${Math.Abs(recurringDebits):N2}");
+        var recurringDebits = filteredTransactions.Where(t => t.IsRecurring && t.Amount < 0).Sum(t => Math.Abs(t.Amount));
+        var nonRecurringDebits = filteredTransactions.Where(t => !t.IsRecurring && t.Amount < 0).Sum(t => Math.Abs(t.Amount));
 
-        var nonRecurringDebits = filteredTransactions.Where(t => t is { IsRecurring: false }).Sum(t => t.Amount);
-        if (nonRecurringDebits != 0) Console.WriteLine($"        One-time expenses: ${Math.Abs(nonRecurringDebits):N2}");
+        if (recurringDebits != 0 || nonRecurringDebits != 0)
+        {
+            var trackedSpend = recurringDebits + nonRecurringDebits;
+            var basis = trackedSpend > 0 ? trackedSpend : 1;
+            Console.WriteLine($"\n  Of ${trackedSpend:N2} in expenses:");
+            if (recurringDebits != 0)
+                Console.WriteLine($"       Recurring: ${recurringDebits:N2}  ({recurringDebits / basis:P0})");
+            if (nonRecurringDebits != 0)
+                Console.WriteLine($"        One-time: ${nonRecurringDebits:N2}  ({nonRecurringDebits / basis:P0})");
+        }
 
         Console.ForegroundColor = ConsoleColor.Red;
         Console.WriteLine("\nMoney received highlighted in red\n");
