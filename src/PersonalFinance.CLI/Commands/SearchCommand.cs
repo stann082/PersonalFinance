@@ -75,9 +75,10 @@ public class SearchCommand(SearchOptions options, IStatementService service)
             foreach (Transaction t in filteredArray)
             {
                 t.Description = t.Description?.Replace(',', ' ');
+                var amount = t.TransactionType == TransactionType.Credit ? $"+{t.Amount}" : $"{t.Amount}";
                 fileContent.Add(options.ShowBalance
-                    ? $"{t.Date.ToShortDateString()},{t.Description},{Math.Abs(t.Amount)},{t.Category},{t.Balance}"
-                    : $"{t.Date.ToShortDateString()},{t.Description},{Math.Abs(t.Amount)},{t.Category}");
+                    ? $"{t.Date.ToShortDateString()},{t.Description},{amount},{t.Category},{t.Balance}"
+                    : $"{t.Date.ToShortDateString()},{t.Description},{amount},{t.Category}");
             }
             
             await File.WriteAllLinesAsync(filePath, fileContent);
