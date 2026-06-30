@@ -54,7 +54,7 @@ public class Transaction : ITrainingModelItem
         Category = item.Category;
         Date = DateTime.TryParse(item.Date, out var dateResult) ? dateResult : DateTime.MinValue;
         Description = item.Description;
-        IsRecurring = Amount < 0 ? item.IsRecurring : null;
+        IsRecurring = Amount < 0 ? (item.IsRecurring ?? false) : null;
         TransactionType = Amount < 0 ? TransactionType.Debit : TransactionType.Credit;
     }
 

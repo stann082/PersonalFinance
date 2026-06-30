@@ -79,9 +79,9 @@ public class StatementService(IMongoDatabase database) : IStatementService
             if (existingTransaction != null)
             {
                 string consoleMessage;
-                if (existingTransaction.IsRecurring != transaction.IsRecurring)
+                if (transaction.IsRecurring == true && existingTransaction.IsRecurring != true)
                 {
-                    var update = Builders<Transaction>.Update.Set(u => u.IsRecurring, transaction.IsRecurring);
+                    var update = Builders<Transaction>.Update.Set(u => u.IsRecurring, true);
                     await transactionsCollection.UpdateOneAsync(filter, update);
 
                     consoleMessage = $"Updated recurring status for: {existingTransaction}";

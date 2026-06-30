@@ -32,7 +32,7 @@ public class TransactionTest
             Assert.That(transaction.Balance, Is.EqualTo(5000.00m));
             Assert.That(transaction.Date, Is.EqualTo(new DateTime(2024, 1, 15)));
             Assert.That(transaction.Category, Is.EqualTo("Groceries"));
-            Assert.That(transaction.IsRecurring, Is.True);
+            Assert.That(transaction.IsRecurring, Is.Null); // credits always have null IsRecurring
         });
     }
 

@@ -183,11 +183,11 @@ public class StatementServiceAdditionalTest
     [Test]
     public async Task SaveAsync_UpdatesRecurringStatusIfChanged()
     {
-        // Arrange
+        // Arrange — use a debit so IsRecurring is meaningful (credits always get null)
         var parsedItem1 = new MockParsedTransactionItem
         {
             Description = "Payment",
-            Amount = "100",
+            Amount = "-100",
             Date = "01/01/2024",
             Balance = "500",
             IsRecurring = false
@@ -199,7 +199,7 @@ public class StatementServiceAdditionalTest
         var parsedItem2 = new MockParsedTransactionItem
         {
             Description = "Payment",
-            Amount = "100",
+            Amount = "-100",
             Date = "01/01/2024",
             Balance = "500",
             IsRecurring = true
