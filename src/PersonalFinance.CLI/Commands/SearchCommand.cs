@@ -71,14 +71,15 @@ public class SearchCommand(SearchOptions options, IStatementService service)
         {
             string filePath = Path.Combine(Path.GetTempPath(), $"fin-{DateTime.Now:yyyyMMddHHmmss}.csv");
             
-            List<string> fileContent = [ options.ShowBalance ? "Date,Description,Amount,Category,Balance" : "Date,Description,Amount,Category" ];
+            List<string> fileContent = [ options.ShowBalance ? "Date,Description,Amount,Category,Balance,Recurring" : "Date,Description,Amount,Category,Recurring" ];
             foreach (Transaction t in filteredArray)
             {
                 t.Description = t.Description?.Replace(',', ' ');
                 var amount = t.TransactionType == TransactionType.Credit ? $"+{t.Amount}" : $"{t.Amount}";
+                var recurringLabel = t.IsRecurring ? "yes" : "no";
                 fileContent.Add(options.ShowBalance
-                    ? $"{t.Date.ToShortDateString()},{t.Description},{amount},{t.Category},{t.Balance}"
-                    : $"{t.Date.ToShortDateString()},{t.Description},{amount},{t.Category}");
+                    ? $"{t.Date.ToShortDateString()},{t.Description},{amount},{t.Category},{t.Balance},{recurringLabel}"
+                    : $"{t.Date.ToShortDateString()},{t.Description},{amount},{t.Category},{recurringLabel}");
             }
             
             await File.WriteAllLinesAsync(filePath, fileContent);
