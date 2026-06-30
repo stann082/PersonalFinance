@@ -9,4 +9,5 @@ public interface IStatementService
     Task<Transaction[]> GetAsync(DateTime? startDate = null, DateTime? stopDate = null);
     Task<DeleteResult> DeleteAsync(string? id);
     Task SaveAsync(IParsedTransactionItem[] parsedItems, ISaveOptions saveOptions);
+    Task UpdateAsync(Transaction transaction);
 }

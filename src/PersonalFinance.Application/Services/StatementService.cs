@@ -39,6 +39,17 @@ public class StatementService(IMongoDatabase database) : IStatementService
         return result.ToArray();
     }
 
+    public async Task UpdateAsync(Transaction transaction)
+    {
+        var collection = GetTransactionsCollection();
+        var filter = Builders<Transaction>.Filter.Eq(t => t.Id, transaction.Id);
+        var update = Builders<Transaction>.Update
+            .Set(t => t.IsRecurring, transaction.IsRecurring)
+            .Set(t => t.Description, transaction.Description)
+            .Set(t => t.Category, transaction.Category);
+        await collection.UpdateOneAsync(filter, update);
+    }
+
     public async Task<DeleteResult> DeleteAsync(string? id)
     {
         var transactionsCollection = GetTransactionsCollection();

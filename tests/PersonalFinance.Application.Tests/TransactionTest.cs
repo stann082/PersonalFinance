@@ -1,4 +1,3 @@
-using PersonalFinance.Application.Models;
 using PersonalFinance.Domain.Misc;
 using PersonalFinance.Domain.Models;
 
