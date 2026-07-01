@@ -14,9 +14,6 @@
                        FontSize="20"
                        FontAttributes="Bold" />
 
-                <Label Text="ID" FontAttributes="Bold" />
-                <Label Text="{Binding TransactionId}" />
-
                 <Label Text="Date" FontAttributes="Bold" />
                 <Label Text="{Binding Date, StringFormat='{}{0:yyyy-MM-dd}'}" />
 
@@ -28,9 +25,6 @@
 
                 <Label Text="Amount" FontAttributes="Bold" />
                 <Label Text="{Binding Amount, StringFormat='{}{0:C}'}" />
-
-                <Label Text="Balance" FontAttributes="Bold" />
-                <Label Text="{Binding Balance, StringFormat='{}{0:C}'}" />
 
                 <Label Text="Recurring" FontAttributes="Bold" />
                 <Label>

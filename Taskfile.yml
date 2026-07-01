@@ -16,3 +16,8 @@ tasks:
     desc: Publish and install the MAUI app to %LOCALAPPDATA%\PersonalFinance
     cmds:
       - pwsh -NoProfile -File scripts/deploy-ui.ps1
+
+  run:
+    desc: Run the MAUI UI app
+    cmds:
+      - dotnet run --project src/PersonalFinance.UI/PersonalFinance.UI.csproj -f net10.0-windows10.0.19041.0
