@@ -1,0 +1,18 @@
+version: '3'
+
+tasks:
+  default:
+    desc: Deploy both CLI and UI
+    cmds:
+      - task: cli
+      - task: ui
+
+  cli:
+    desc: Publish and install fin.exe to %APPDATA%\utils
+    cmds:
+      - pwsh -NoProfile -File scripts/deploy-cli.ps1
+
+  ui:
+    desc: Publish and install the MAUI app to %LOCALAPPDATA%\PersonalFinance
+    cmds:
+      - pwsh -NoProfile -File scripts/deploy-ui.ps1
