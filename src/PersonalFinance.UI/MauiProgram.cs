@@ -29,6 +29,8 @@ public static class MauiProgram
         builder.Services.AddSingleton<IMongoDatabase>(_ => new MongoClient(mongoConnectionString).GetDatabase("financial_data"));
         builder.Services.AddTransient<TransactionsViewModel>();
         builder.Services.AddTransient<TransactionsPage>();
+        builder.Services.AddTransient<TransactionDetailsViewModel>();
+        builder.Services.AddTransient<TransactionDetailsPage>();
         return builder.Build();
     }
 }
