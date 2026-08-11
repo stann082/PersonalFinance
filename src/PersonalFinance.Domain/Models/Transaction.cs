@@ -28,6 +28,12 @@ public class Transaction : ITrainingModelItem
     public string? Category { get; set; }
     public DateTime Date { get; set; }
     public string? Description { get; set; }
+
+    /// <summary>
+    /// Identifier from the upstream source (SimpleFIN). Null for CSV-imported transactions.
+    /// </summary>
+    public string? ExternalId { get; set; }
+
     public bool IsDeposit => TransactionType == TransactionType.Credit;
     public bool? IsRecurring { get; set; }
     public string? TransactionId { get; set; }
@@ -54,6 +60,7 @@ public class Transaction : ITrainingModelItem
         Category = item.Category;
         Date = DateTime.TryParse(item.Date, out var dateResult) ? dateResult : DateTime.MinValue;
         Description = item.Description;
+        ExternalId = item.SourceId;
         IsRecurring = Amount < 0 ? (item.IsRecurring ?? false) : null;
         TransactionType = Amount < 0 ? TransactionType.Debit : TransactionType.Credit;
     }

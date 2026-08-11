@@ -370,6 +370,7 @@ public class TransactionTest
         public string? Category { get; set; }
         public string? Date { get; set; }
         public string? Balance { get; set; }
+        public string? SourceId { get; set; }
     }
 
     #endregion

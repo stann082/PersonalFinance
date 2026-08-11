@@ -1,4 +1,5 @@
-﻿using MongoDB.Driver;
+﻿using MongoDB.Bson;
+using MongoDB.Driver;
 using PersonalFinance.Domain.Models;
 using PersonalFinance.Domain.Services;
 
@@ -64,25 +65,39 @@ public class StatementService(IMongoDatabase database) : IStatementService
         int newTransactions = 0;
         int existingTransactions = 0;
         int updatedTransactions = 0;
+        int reconciledTransactions = 0;
 
         Transaction[] transactions = parsedItems.Select(i => new Transaction(i)).ToArray();
         foreach (Transaction transaction in transactions)
         {
-            var filter = Builders<Transaction>.Filter.And(
-                Builders<Transaction>.Filter.Eq(f => f.Description, transaction.Description),
-                Builders<Transaction>.Filter.Eq(f => f.Amount, transaction.Amount),
-                Builders<Transaction>.Filter.Eq(f => f.Date, transaction.Date),
-                Builders<Transaction>.Filter.Eq(f => f.Balance, transaction.Balance)
-            );
+            Transaction? existingTransaction = await FindExistingAsync(transactionsCollection, transaction);
 
-            var existingTransaction = await transactionsCollection.Find(filter).FirstOrDefaultAsync();
+            // A match found by content rather than by id is a transaction we already imported
+            // from CSV and are now seeing again from SimpleFIN. Stamp the id onto it so later
+            // syncs match directly instead of inserting a duplicate.
+            if (existingTransaction is { ExternalId: null } && transaction.ExternalId != null)
+            {
+                await transactionsCollection.UpdateOneAsync(
+                    Builders<Transaction>.Filter.Eq(f => f.Id, existingTransaction.Id),
+                    Builders<Transaction>.Update.Set(u => u.ExternalId, transaction.ExternalId));
+
+                existingTransaction.ExternalId = transaction.ExternalId;
+                reconciledTransactions++;
+
+                if (saveOptions.Verbose)
+                {
+                    Console.WriteLine($"Linked existing transaction to SimpleFIN id {transaction.ExternalId}: {existingTransaction}");
+                }
+            }
+
             if (existingTransaction != null)
             {
                 string consoleMessage;
                 if (transaction.IsRecurring == true && existingTransaction.IsRecurring != true)
                 {
                     var update = Builders<Transaction>.Update.Set(u => u.IsRecurring, true);
-                    await transactionsCollection.UpdateOneAsync(filter, update);
+                    await transactionsCollection.UpdateOneAsync(
+                        Builders<Transaction>.Filter.Eq(f => f.Id, existingTransaction.Id), update);
 
                     consoleMessage = $"Updated recurring status for: {existingTransaction}";
                     updatedTransactions++;
@@ -105,7 +120,29 @@ public class StatementService(IMongoDatabase database) : IStatementService
             await transactionsCollection.InsertOneAsync(transaction);
         }
 
-        Console.WriteLine($"Saved {newTransactions} new transactions. Updated {updatedTransactions} transactions. Skipped {existingTransactions} transactions that were already correct.");
+        string reconciledMessage = reconciledTransactions > 0
+            ? $" Linked {reconciledTransactions} previously imported transactions to their source id."
+            : string.Empty;
+        Console.WriteLine($"Saved {newTransactions} new transactions. Updated {updatedTransactions} transactions. Skipped {existingTransactions} transactions that were already correct.{reconciledMessage}");
+    }
+
+    public async Task EnsureIndexesAsync()
+    {
+        var collection = GetTransactionsCollection();
+
+        // A sparse index is not enough here: the driver writes an explicit null for
+        // CSV-imported transactions, and sparse only skips documents where the field is
+        // absent, so every CSV row would collide on null. Restricting the index to string
+        // values leaves them out entirely.
+        var options = new CreateIndexOptions<Transaction>
+        {
+            Name = "external_id_unique",
+            Unique = true,
+            PartialFilterExpression = Builders<Transaction>.Filter.Type(t => t.ExternalId, BsonType.String)
+        };
+
+        await collection.Indexes.CreateOneAsync(
+            new CreateIndexModel<Transaction>(Builders<Transaction>.IndexKeys.Ascending(t => t.ExternalId), options));
     }
 
     #endregion
@@ -115,6 +152,47 @@ public class StatementService(IMongoDatabase database) : IStatementService
     public IMongoCollection<Transaction> GetTransactionsCollection()
     {
         return database.GetCollection<Transaction>("transactions");
+    }
+
+    /// <summary>
+    /// Locates the stored copy of a transaction, preferring the source's own id when there is
+    /// one and falling back to content matching otherwise.
+    /// </summary>
+    private static async Task<Transaction?> FindExistingAsync(
+        IMongoCollection<Transaction> collection, Transaction transaction)
+    {
+        var b = Builders<Transaction>.Filter;
+
+        if (transaction.ExternalId != null)
+        {
+            var byExternalId = await collection
+                .Find(b.Eq(f => f.ExternalId, transaction.ExternalId))
+                .FirstOrDefaultAsync();
+            if (byExternalId != null)
+            {
+                return byExternalId;
+            }
+        }
+
+        // Balance participates in the match only for CSV imports, which are the only source
+        // that supplies a running balance.
+        var contentFilters = new List<FilterDefinition<Transaction>>
+        {
+            b.Eq(f => f.Description, transaction.Description),
+            b.Eq(f => f.Amount, transaction.Amount),
+            b.Eq(f => f.Date, transaction.Date)
+        };
+
+        if (transaction.ExternalId == null)
+        {
+            contentFilters.Add(b.Eq(f => f.Balance, transaction.Balance));
+        }
+        else
+        {
+            contentFilters.Add(b.Eq(f => f.ExternalId, null));
+        }
+
+        return await collection.Find(b.And(contentFilters)).FirstOrDefaultAsync();
     }
 
     #endregion

@@ -61,6 +61,8 @@ public class BankStatementParserTest
         public string? Date { get; set; }
 
         public string? Balance { get; set; }
+
+        public string? SourceId { get; set; }
     }
 
     private class MockSavedOptions : ISaveOptions

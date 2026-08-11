@@ -3,6 +3,7 @@ using MongoDB.Driver;
 using PersonalFinance.Application.Services;
 using PersonalFinance.Domain.Services;
 using PersonalFinance.Infrastructure;
+using PersonalFinance.Infrastructure.SimpleFin;
 using Serilog;
 
 namespace PersonalFinance.CLI;
@@ -29,9 +30,11 @@ public static class Program
                 .GetDatabase("financial_data"))
             .AddScoped<IBankStatementParser, BankStatementParser>()
             .AddScoped<IStatementService, StatementService>()
-            .AddScoped<ITransactionCategorizer, TransactionCategorizer>()
-            .BuildServiceProvider();
-        return await services.GetService<App>()?.RunApp(args)!;
+            .AddScoped<ITransactionCategorizer, TransactionCategorizer>();
+        services.AddHttpClient<ISimpleFinClient, SimpleFinClient>();
+
+        var provider = services.BuildServiceProvider();
+        return await provider.GetService<App>()?.RunApp(args)!;
     }
 
     #endregion

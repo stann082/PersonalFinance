@@ -14,6 +14,9 @@ public class ParsedTransactionItem : IParsedTransactionItem
     
     public string? Date { get; set; }
     public string? Description { get; set; }
-    
+
     public bool? IsRecurring { get; set; }
+
+    /// <summary>Bank statement rows carry no durable id, so these fall back to composite matching.</summary>
+    public string? SourceId => null;
 }

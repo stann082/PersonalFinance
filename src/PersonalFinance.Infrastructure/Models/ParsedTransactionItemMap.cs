@@ -10,5 +10,6 @@ public sealed class ParsedTransactionItemMap : ClassMap<ParsedTransactionItem>
         AutoMap(CultureInfo.InvariantCulture);
         Map(m => m.Category).Ignore();
         Map(m => m.IsRecurring).Ignore();
+        Map(m => m.SourceId).Ignore();
     }
 }
