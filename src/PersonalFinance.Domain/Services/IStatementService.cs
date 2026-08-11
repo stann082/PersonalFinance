@@ -8,6 +8,7 @@ public interface IStatementService
     Task<Transaction[]> GetAsync(ISearchOptions? searchOptions);
     Task<Transaction[]> GetAsync(DateTime? startDate = null, DateTime? stopDate = null);
     Task<DeleteResult> DeleteAsync(string? id);
+    Task EnsureIndexesAsync();
     Task SaveAsync(IParsedTransactionItem[] parsedItems, ISaveOptions saveOptions);
     Task UpdateAsync(Transaction transaction);
 }

@@ -317,6 +317,7 @@ public class StatementServiceAdditionalTest
         public string? Category { get; set; }
         public string? Date { get; set; }
         public string? Balance { get; set; }
+        public string? SourceId { get; set; }
     }
 
     private class MockSaveOptions : ISaveOptions

@@ -1,25 +1,28 @@
 ﻿using CommandLine;
 using PersonalFinance.CLI.Commands;
 using PersonalFinance.CLI.Options;
+using PersonalFinance.Domain.Models;
 using PersonalFinance.Domain.Services;
 using PersonalFinance.Infrastructure;
 
 namespace PersonalFinance.CLI;
 
-public class App(IBankStatementParser statementParser, IStatementService statementService, ITransactionCategorizer transactionCategorizer)
+public class App(IBankStatementParser statementParser, IStatementService statementService, ITransactionCategorizer transactionCategorizer, ISimpleFinClient simpleFinClient)
 {
 
     #region Public Methods
 
     public async Task<int> RunApp(IEnumerable<string> args)
     {
-        return await Parser.Default.ParseArguments<SaveOptions, SearchOptions, EditOptions, RemoveOptions, ReviewOptions, ExportOptions>(args).MapResult(
+        return await Parser.Default.ParseArguments<SaveOptions, SearchOptions, EditOptions, RemoveOptions, ReviewOptions, ExportOptions, SyncOptions, ClaimOptions>(args).MapResult(
                 async (SaveOptions opts) => await new SaveCommand(opts, statementParser, statementService, transactionCategorizer).Execute(),
                 async (SearchOptions opts) => await new SearchCommand(opts, statementService).Execute(),
                 async (EditOptions opts) => await new EditCommand(opts, statementService).Execute(),
                 async (RemoveOptions opts) => await new RemoveCommand(opts, statementService).Execute(),
                 async (ReviewOptions opts) => await new ReviewCommand(opts, statementService, transactionCategorizer).Execute(),
                 async (ExportOptions opts) => await new ExportCommand(opts, statementService).Execute(),
+                async (SyncOptions opts) => await new SyncCommand(opts, simpleFinClient, statementService, transactionCategorizer).Execute(),
+                async (ClaimOptions opts) => await new ClaimCommand(opts, simpleFinClient).Execute(),
                 _ => Task.FromResult(1));
     }
 
