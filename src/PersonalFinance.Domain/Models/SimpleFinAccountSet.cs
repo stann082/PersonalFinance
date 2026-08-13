@@ -13,10 +13,25 @@ public class SimpleFinAccountSet
     public string[] Errors { get; set; } = [];
 
     [JsonPropertyName("errlist")]
-    public Dictionary<string, string[]>? ErrList { get; set; }
+    public SimpleFinError[]? ErrList { get; set; }
 
     [JsonPropertyName("accounts")]
     public SimpleFinAccount[] Accounts { get; set; } = [];
+}
+
+public class SimpleFinError
+{
+    [JsonPropertyName("code")]
+    public string? Code { get; set; }
+
+    [JsonPropertyName("msg")]
+    public string? Msg { get; set; }
+
+    [JsonPropertyName("conn_id")]
+    public string? ConnId { get; set; }
+
+    [JsonPropertyName("account_id")]
+    public string? AccountId { get; set; }
 }
 
 public class SimpleFinAccount

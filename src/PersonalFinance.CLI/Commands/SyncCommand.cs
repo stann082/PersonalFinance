@@ -112,12 +112,9 @@ public class SyncCommand(SyncOptions options, ISimpleFinClient simpleFinClient, 
             return;
         }
 
-        foreach (var (key, messages) in accountSet.ErrList)
+        foreach (var error in accountSet.ErrList)
         {
-            foreach (string message in messages)
-            {
-                Console.WriteLine($"SimpleFIN [{key}]: {message}");
-            }
+            Console.WriteLine($"SimpleFIN [{error.Code}]: {error.Msg}");
         }
     }
 

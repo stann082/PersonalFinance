@@ -77,7 +77,7 @@ public class SimpleFinTransactionItemTest
     {
         // Arrange
         const string json = """
-        { "errlist": { "auth": ["Login expired for Example Bank"] }, "accounts": [] }
+        { "errlist": [{ "code": "con.auth", "msg": "Login expired for Example Bank", "conn_id": "CON-1" }], "accounts": [] }
         """;
 
         // Act
@@ -85,7 +85,9 @@ public class SimpleFinTransactionItemTest
 
         // Assert
         Assert.That(accountSet!.ErrList, Is.Not.Null);
-        Assert.That(accountSet.ErrList!["auth"], Has.Length.EqualTo(1));
+        Assert.That(accountSet.ErrList, Has.Length.EqualTo(1));
+        Assert.That(accountSet.ErrList![0].Code, Is.EqualTo("con.auth"));
+        Assert.That(accountSet.ErrList[0].Msg, Is.EqualTo("Login expired for Example Bank"));
     }
 
     #endregion
